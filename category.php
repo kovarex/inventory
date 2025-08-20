@@ -1,6 +1,6 @@
 <?php
 require("src/header.php");
-
+echo "<h1>Categories</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
 if (@$_POST["action"] == "edit")
@@ -13,21 +13,21 @@ if (@$_POST["action"] == "edit")
         ."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add")
-  $db->query("INSERT INTO im_category(name,description,home_id) value('".
-             $db->real_escape_string($_POST["name"])."','".
-             $db->real_escape_string($_POST["description"])."',".
-             homeID().")");
+  query("INSERT INTO im_category(name,description,home_id) value('".
+        $db->real_escape_string($_POST["name"])."','".
+        $db->real_escape_string($_POST["description"])."',".
+        homeID().")");
 
 if (@$_POST["action"] == "delete")
-  $db->query("DELETE FROM im_category where id='".
-             $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+  query("DELETE FROM im_category where id='".
+        $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
 
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
 {
-  $result=$db->query("SELECT * FROM im_category where id='".
-             $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
-  $row=$result->fetch_assoc();
+  $result = query("SELECT * FROM im_category where id='".
+                  $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+  $row = $result->fetch_assoc();
   $formAction = "edit";
 }
 ?>
@@ -51,35 +51,37 @@ if (@$_POST["action"] == "start-edit")
 <?php
 
 
-echo "<table class='data-table'>";
-
 $result = $db->query("SELECT * FROM im_category where im_category.home_id=".homeID());
-while($row = $result->fetch_assoc())
+if ($result->num_rows != 0)
 {
-  echo <<<HTML
-  <tr>
-    <td>
-      {$row["name"]}
-    </td>
-    <td>
-      {$row["description"]}
-    </td>
-    <td>
-      <form method="post" >
-        <input type="submit" value="Delete"/>
-        <input type="hidden" name="id" value="{$row["id"]}"/>
-        <input type="hidden" name="action" value="delete">
-      </form>
-    </td>
-    <td>
-      <form method="post" >
-        <input type="submit" value="Edit"/>
-        <input type="hidden" name="id" value="{$row["id"]}"/>
-        <input type="hidden" name="action" value="start-edit">
-      </form>
-    </td>
-  </tr>
-HTML;
+  echo "<table class='data-table'><tr><th>Name</th><th>Description</th></tr>";
+  while($row = $result->fetch_assoc())
+  {
+    echo <<<HTML
+    <tr>
+      <td>
+        {$row["name"]}
+      </td>
+      <td>
+        {$row["description"]}
+      </td>
+      <td>
+        <form method="post" >
+          <input type="submit" value="Delete"/>
+          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="action" value="delete">
+        </form>
+      </td>
+      <td>
+        <form method="post" >
+          <input type="submit" value="Edit"/>
+          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="action" value="start-edit">
+        </form>
+      </td>
+    </tr>
+  HTML;
+  }
 }
 
 echo "</table>";
