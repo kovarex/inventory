@@ -1,10 +1,7 @@
 <?php
 require("src/header.php");
 
-$queryRightCheck = " and exists(SELECT * from im_home_user,im_category".
-                   " where im_category.id='".$db->real_escape_string($_POST["id"])."'".
-                   " and im_home_user.user_id=".userID().
-                   " and im_home_user.home_id = im_category.home_id)";
+$queryRightCheck = " and home_id=".homeID();
 
 if (@$_POST["action"] == "edit")
   query("UPDATE im_category SET name='".
@@ -16,19 +13,20 @@ if (@$_POST["action"] == "edit")
         ."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add")
-  $db->query("INSERT INTO im_category(name,description) value('".
+  $db->query("INSERT INTO im_category(name,description,home_id) value('".
              $db->real_escape_string($_POST["name"])."','".
-             $db->real_escape_string($_POST["description"])."')");
+             $db->real_escape_string($_POST["description"])."',".
+             homeID().")");
 
 if (@$_POST["action"] == "delete")
   $db->query("DELETE FROM im_category where id='".
-             $db->real_escape_string($_POST["id"])."'");
+             $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
 
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
 {
   $result=$db->query("SELECT * FROM im_category where id='".
-             $db->real_escape_string($_POST["id"])."'");
+             $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
   $row=$result->fetch_assoc();
   $formAction = "edit";
 }
@@ -55,7 +53,7 @@ if (@$_POST["action"] == "start-edit")
 
 echo "<table class='data-table'>";
 
-$result = $db->query("SELECT * FROM im_category");
+$result = $db->query("SELECT * FROM im_category where im_category.home_id=".homeID());
 while($row = $result->fetch_assoc())
 {
   echo <<<HTML
