@@ -1,5 +1,5 @@
 <?php
-include("db.php");
-include("auth.php");
-include("header_internal");
+require("src/db.php");
+require("src/auth.php");
+require("src/header_internal.php");
 ?>

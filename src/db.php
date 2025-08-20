@@ -1,6 +1,7 @@
 <?php
-include("../config.php");
-$db = new mysqli("a066um.forpsi.com", "f190987", $dbPassword, "f190987");
+require("config.php");
+
+$db = new mysqli($dbServer, $dbUser, $dbPassword, $dbName);
 if ($db->connect_error)
   die("Connection failed: " . $db->connect_error);
 ?>

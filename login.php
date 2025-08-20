@@ -27,7 +27,7 @@ function checkLogout($action)
     $_SESSION["user"] = NULL;
 }
 
-include("src/db.php");
+require("src/db.php");
 session_start();
 checkLogout($_POST['action']);
 $loginResult = checkLogin($_POST['username'], $_POST['password']);
@@ -38,7 +38,7 @@ if ($loginResult === true)
   die();
 }
 
-include("src/header_internal.php");
+require("src/header_internal.php");
 
 if (is_string($loginResult))
   echo $loginResult;
@@ -71,5 +71,5 @@ else
   <?php
 }
 
-include("src/footer.php")
+require("src/footer.php")
 ?>
