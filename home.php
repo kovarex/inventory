@@ -1,33 +1,47 @@
 <?php
+$homeNotRequired = true;
+require_once("src/db.php");
+require_once("src/auth.php");
+
+$myHomesSelect = "SELECT * from im_home_user where im_home_user.home_id='".
+                    $db->real_escape_string($_POST["id"])."' and im_home_user.user_id=".userID();
+$queryRightCheck = "and exists(".$myHomesSelect.")";
+if (@$_POST["action"] == "activate")
+{
+  if (query($myHomesSelect)->num_rows != 0)
+    $_SESSION["home"] = query("SELECT * from im_home where id='".$db->real_escape_string($_POST["id"])."'")->fetch_assoc();
+}
+
 require("src/header.php");
 echo "<h1>Homes</h1>";
 
+
 if (@$_POST["action"] == "edit")
-  $db->query("UPDATE im_home SET name='".
-             $db->real_escape_string($_POST["name"])."',
-             description='".
-             $db->real_escape_string($_POST["description"]).
-             "' WHERE id='".
-             $db->real_escape_string($_POST["id"])
-             ."'");
+  query("UPDATE im_home SET name='".
+        $db->real_escape_string($_POST["name"])."',
+        description='".
+        $db->real_escape_string($_POST["description"]).
+        "' WHERE id='".
+        $db->real_escape_string($_POST["id"])
+        ."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add")
   multi_query_and_clear("INSERT INTO im_home(name,description) value('".
                         $db->real_escape_string($_POST["name"])."','".
                         $db->real_escape_string($_POST["description"])."');".
                         "INSERT INTO im_home_user(home_id, user_id) ".
-                        "values(LAST_INSERT_ID(), ".$_SESSION["user"]["id"].")");
+                        "values(LAST_INSERT_ID(), ".userID().")");
 
 if (@$_POST["action"] == "delete")
-  $db->query("DELETE FROM im_home where id='".
-             $db->real_escape_string($_POST["id"])."'");
+  query("DELETE FROM im_home where id='".
+        $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
 
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
 {
-  $result=$db->query("SELECT * FROM im_home where id='".
-             $db->real_escape_string($_POST["id"])."'");
-  $row=$result->fetch_assoc();
+  $result = query("SELECT * FROM im_home where id='".
+                  $db->real_escape_string($_POST["id"])."'");
+  $row = $result->fetch_assoc();
   $formAction = "edit";
 }
 ?>
@@ -51,16 +65,34 @@ if (@$_POST["action"] == "start-edit")
 <?php
 
 
-$result = $db->query("SELECT * FROM im_home");
+$result = query("SELECT im_home.* FROM im_home,im_home_user where im_home.id=im_home_user.home_id and im_home_user.user_id=".userID());
+
+function activeColumn($row)
+{
+  if ($row["id"] === homeID())
+    return "Active";
+  return <<<HTML
+          <form method="post" >
+          <input type="submit" value="Activate"/>
+          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="action" value="activate">
+        </form>
+HTML;
+}
 
 if ($result->num_rows != 0)
 {
-  echo "<table class='data-table'><tr><th>Name</th><th>Description</th></tr>";
+  echo "<table class='data-table'><tr><th>State</th><th>Name</th><th>Description</th></tr>";
 
   while($row = $result->fetch_assoc())
   {
+    $activeColumnResult = activeColumn($row);
+
     echo <<<HTML
     <tr>
+      <td>
+        {$activeColumnResult}
+      </td>
       <td>
         {$row["name"]}
       </td>
@@ -87,8 +119,6 @@ if ($result->num_rows != 0)
 
   echo "</table>";
 }
-else
-  echo print_r($result);
 
 require("src/footer.php");
 ?>

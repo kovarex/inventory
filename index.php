@@ -1,4 +1,5 @@
 <?php
+$hideIndexLink = true;
 require("src/header.php");
 ?>
 

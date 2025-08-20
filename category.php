@@ -1,14 +1,19 @@
 <?php
 require("src/header.php");
 
+$queryRightCheck = " and exists(SELECT * from im_home_user,im_category".
+                   " where im_category.id='".$db->real_escape_string($_POST["id"])."'".
+                   " and im_home_user.user_id=".userID().
+                   " and im_home_user.home_id = im_category.home_id)";
+
 if (@$_POST["action"] == "edit")
-  $db->query("UPDATE im_category SET name='".
-             $db->real_escape_string($_POST["name"])."',
-             description='".
-             $db->real_escape_string($_POST["description"]).
-             "' WHERE id='".
-             $db->real_escape_string($_POST["id"])
-             ."'");
+  query("UPDATE im_category SET name='".
+        $db->real_escape_string($_POST["name"])."',
+        description='".
+        $db->real_escape_string($_POST["description"]).
+        "' WHERE id='".
+        $db->real_escape_string($_POST["id"])
+        ."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add")
   $db->query("INSERT INTO im_category(name,description) value('".
