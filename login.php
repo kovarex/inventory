@@ -50,6 +50,7 @@ if (!empty($_SESSION["user"]))
   <form method="post">
     <input type="submit" value="Logoff"/>
     <input type="hidden" name="action" value="logoff"/>
+  </form>
   <?php
 }
 else

@@ -2,7 +2,9 @@
 require("src/header.php");
 ?>
 
-Hello world!
+<ul>
+  <li><a href="category.php">Categories</a></li>
+</ul>
 <?php
 require("src/footer.php");
 ?>
