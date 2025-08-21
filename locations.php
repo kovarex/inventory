@@ -80,7 +80,7 @@ if (count($rows) != 0)
     echo <<<HTML
     <tr>
       <td>
-        {$row["name"]}
+        <a href="location.php?id={$row["id"]}">{$row["name"]}</a>
       </td>
       <td>
         {$row["description"]}

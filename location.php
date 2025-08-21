@@ -9,42 +9,38 @@ $id = escape($_GET["id"]);
 $result = query("SELECT
                    im_location.id,
                    im_location.name,
-                   im_location.description,
-                 FROM im_category, im_item
-                 left join im_location parent_location on im_item.location_id=parent_location.id
-                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().
-                 " and im_item.id=$id");
+                   im_location.description
+                 FROM im_location
+                 WHERE
+                   im_location.id=$id");
 
 if ($result->num_rows == 0)
-  die("Item not found!");
+  die("Location not found!");
 
 $item = $result->fetch_assoc();
 
 echo "<h1>Location: ".$item["name"]."</h1>";
 ?>
- <table>
-    <tr>
-      <td>Name:</td>
-      <td><?= @$item['name'] ?></td>
-    </tr>
-    <tr>
-      <td>Description:</td>
-      <td><?= @$item['description'] ?></td>
-    </tr>
-    <tr>
-      <td>Category:</td>
-      <td><?= @$item['category_name'] ?></td>
-    </tr>
-    <tr>
-      <td>Location:</td>
-      <td><?= @$item['location_name'] ?></td>
-    </tr>
-  </table>
+<?= @$item['description'] ?>
 <?php
-if ($item['image_size'] > 0)
-  echo "<img src=\"image.php?source=item&id={$item['id']}\"/>";
 
-
+$rows = query("SELECT
+                  im_item.*
+                FROM im_item
+                WHERE im_item.location_id=$id")->fetch_all(MYSQLI_ASSOC);
+if (count($rows) != 0)
+{
+  echo "<table class=\"data-table\"><tr><th>Name</th></tr>";
+  foreach($rows as $row)
+  {
+    echo "<tr><td>";
+    echo "<a href=\"item.php?id=".$row["id"]."\">".$row["name"]."</a>";
+    echo "</td></tr>";
+  }
+  echo "</table>";
+}
+/*
+log will be here
 $result = query("SELECT
                        im_transaction.*,
                        from_location.name as from_location_name,
@@ -57,7 +53,7 @@ $result = query("SELECT
                  LEFT JOIN im_location parent_from_location ON parent_from_location.id=im_transaction.parent_from_location_id
                  LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
                  LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
-                 WHERE item_id=$id");
+                 WHERE from_location_id=$id or to_location_id=$id");
 
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
@@ -73,7 +69,7 @@ if (count($rows) != 0)
     {
       echo "<tr><td>";
       if (empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "Created in ".$row["to_location_name"];
+        echo "in ".$row["to_location_name"];
       else if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
         echo "Moved from ".$row["from_location_name"]." to ".$row["to_location_name"];
       else
@@ -82,10 +78,9 @@ if (count($rows) != 0)
       echo "</tr>";
     }
   ?>
-  </table>
-<?php
-}
-require("src/footer.php"); ?>
+  </table>*/
+?>
+<?php require("src/footer.php"); ?>
 
 
 
