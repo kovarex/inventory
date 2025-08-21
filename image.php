@@ -14,7 +14,7 @@ if (!isset($_GET["id"]))
   die("ID of the object not provided");
 
 $id = $db->real_escape_string($_GET["id"]);
-$result = query("SELECT image FROM $sourceTableName where id='$id'");
+$result = query("SELECT image FROM $sourceTableName where id='$id' and home_id=".homeID());
 if ($result->num_rows == 0)
   die("Image not found!");
 $image = $result->fetch_assoc()["image"];
