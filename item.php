@@ -54,12 +54,15 @@ $result = query("SELECT
                        to_location.name as to_location_name,
                        parent_from_location.name as parent_from_location_name,
                        parent_to_location.name as parent_to_location_name,
-                       parent_location.name as parent_location_name FROM im_transaction
+                       parent_location.name as parent_location_name,
+                       im_user.username as user_name
+                       FROM im_transaction
                  LEFT JOIN im_location from_location ON from_location.id=im_transaction.from_location_id
                  LEFT JOIN im_location to_location ON to_location.id=im_transaction.to_location_id
                  LEFT JOIN im_location parent_from_location ON parent_from_location.id=im_transaction.parent_from_location_id
                  LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
                  LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
+                 LEFT JOIN im_user ON im_user.id=im_transaction.user_id
                  WHERE item_id=$id");
 
 $rows = $result->fetch_all(MYSQLI_ASSOC);
@@ -69,7 +72,7 @@ if (count($rows) != 0)
 ?>
   <table class="data-table">
     <tr>
-      <th>Transaction</th><th>Comment</th>
+      <th>Transaction</th><th>Comment</th><th>User</th>
     </tr>
   <?php
     foreach($rows as $row)
@@ -82,6 +85,7 @@ if (count($rows) != 0)
       else
         echo "Unknown operation";
       echo "</td><td>".$row["comment"]."</td>";
+      echo "</td><td>".$row["user_name"]."</td>";
       echo "</tr>";
     }
   ?>

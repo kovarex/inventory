@@ -1,113 +1,91 @@
 <?php
 require("src/header.php");
-echo "<h1>Locations</h1>";
-$queryRightCheck = " and home_id=".homeID();
 
-if (@$_POST["action"] == "edit")
-  query("UPDATE im_location SET
-          name='".$db->real_escape_string($_POST["name"])."',
-          description='".$db->real_escape_string($_POST["description"])."',
-          parent_location_id='".$db->real_escape_string($_POST["parent_id"])."'
-        WHERE id='".$db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+if (!isset($_GET["id"]))
+  die("ID of the object not provided");
 
-if (@$_POST["action"] == "add")
-  query("INSERT INTO im_location(home_id, name,description,parent_location_id) value(".
-        homeID().",'".
-        $db->real_escape_string($_POST["name"])."','".
-        $db->real_escape_string($_POST["description"])."','".
-        $db->real_escape_string($_POST["parent_id"])."')");
+$id = escape($_GET["id"]);
 
-if (@$_POST["action"] == "delete")
-  query("DELETE FROM im_location where id='".
-        $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+$result = query("SELECT
+                   im_location.id,
+                   im_location.name,
+                   im_location.description,
+                 FROM im_category, im_item
+                 left join im_location parent_location on im_item.location_id=parent_location.id
+                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().
+                 " and im_item.id=$id");
 
-$formAction = "add";
-if (@$_POST["action"] == "start-edit")
-{
-  $result = query("SELECT * FROM im_location where id='".
-                  $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
-  $locationToEdit = $result->fetch_assoc();
-  $formAction = "edit";
-}
+if ($result->num_rows == 0)
+  die("Item not found!");
+
+$item = $result->fetch_assoc();
+
+echo "<h1>Location: ".$item["name"]."</h1>";
 ?>
-
-<?php
-
-$result = $db->query("SELECT im_location.id, im_location.name, im_location.description, parent_location.name as parent_name FROM im_location ".
-                     "left join im_location parent_location on im_location.parent_location_id=parent_location.id ".
-                     "where im_location.home_id=".homeID());
-$rows = $result->fetch_all(MYSQLI_ASSOC);
-
-?>
-
-<form method="post">
-  <input type="hidden" name="action" value="<?= $formAction ?>"/>
-  <input type='hidden' name='id' value="<?= @$locationToEdit['id'] ?>"/>
-  <table>
+ <table>
     <tr>
-      <td><label for="name">Name:</label></td>
-      <td><input type="text" name="name" value="<?= @$locationToEdit['name'] ?>"/></td>
+      <td>Name:</td>
+      <td><?= @$item['name'] ?></td>
     </tr>
     <tr>
-      <td><label for="description">Description:</label></td>
-      <td><input type="text" name="description" value="<?= @$locationToEdit['description'] ?>"/></td>
+      <td>Description:</td>
+      <td><?= @$item['description'] ?></td>
     </tr>
     <tr>
-      <td><label for="parent_id">Parent:<label</td>
-      <td>
-        <select name="parent_id">
-          <option value="">None</option>
-        <?php
-          foreach($rows as $row)
-          {
-            $selected = $row["id"] == $locationToEdit["parent_location_id"] ? " selected" : "";
-            echo "<option value='{$row["id"]}'{$selected}>{$row["name"]}</option>";
-          }
-        ?>
-        </select>
+      <td>Category:</td>
+      <td><?= @$item['category_name'] ?></td>
+    </tr>
+    <tr>
+      <td>Location:</td>
+      <td><?= @$item['location_name'] ?></td>
     </tr>
   </table>
-  <input type="submit" value="<?= $formAction == "add" ? "Add location" : "Edit" ?>"/>
-</form>
-
 <?php
+if ($item['image_size'] > 0)
+  echo "<img src=\"image.php?source=item&id={$item['id']}\"/>";
+
+
+$result = query("SELECT
+                       im_transaction.*,
+                       from_location.name as from_location_name,
+                       to_location.name as to_location_name,
+                       parent_from_location.name as parent_from_location_name,
+                       parent_to_location.name as parent_to_location_name,
+                       parent_location.name as parent_location_name FROM im_transaction
+                 LEFT JOIN im_location from_location ON from_location.id=im_transaction.from_location_id
+                 LEFT JOIN im_location to_location ON to_location.id=im_transaction.to_location_id
+                 LEFT JOIN im_location parent_from_location ON parent_from_location.id=im_transaction.parent_from_location_id
+                 LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
+                 LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
+                 WHERE item_id=$id");
+
+$rows = $result->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
 {
-  echo "<table class='data-table'><tr><th>Name</th><th>Description</th><th>Parent</th></tr>";
-  foreach($rows as $row)
-  {
-    echo <<<HTML
-    <tr>
-      <td>
-        {$row["name"]}
-      </td>
-      <td>
-        {$row["description"]}
-      </td>
-      <td>
-        {$row["parent_name"]}
-      </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Delete"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
-          <input type="hidden" name="action" value="delete">
-        </form>
-      </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
-          <input type="hidden" name="action" value="start-edit">
-        </form>
-      </td>
-    </tr>
-  HTML;
-  }
-}
-
-echo "</table>";
-
-require("src/footer.php");
 ?>
+  <table class="data-table">
+    <tr>
+      <th>Transaction</th><th>Comment</th>
+    </tr>
+  <?php
+    foreach($rows as $row)
+    {
+      echo "<tr><td>";
+      if (empty($row["from_location_id"]) and !empty($row["to_location_id"]))
+        echo "Created in ".$row["to_location_name"];
+      else if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
+        echo "Moved from ".$row["from_location_name"]." to ".$row["to_location_name"];
+      else
+        echo "Unknown operation";
+      echo "</td><td>".$row["comment"]."</td>";
+      echo "</tr>";
+    }
+  ?>
+  </table>
+<?php
+}
+require("src/footer.php"); ?>
+
+
+
