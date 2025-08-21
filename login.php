@@ -24,7 +24,10 @@ function checkLogin($username, $password)
 function checkLogout($action)
 {
   if ($action === "logoff")
+  {
     $_SESSION["user"] = NULL;
+    $_SESSION["home"] = NULL;
+  }
 }
 
 require("src/db.php");
@@ -69,7 +72,12 @@ else
     </table>
     <input type="submit" value="Login"/>
   </form>
-  <?php
+
+ <form method="get" action="register.php">
+    <input type="submit" value="Register"/>
+ </form>
+
+<?php
 }
 
 require("src/footer.php")
