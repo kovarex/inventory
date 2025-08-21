@@ -15,6 +15,22 @@ if (@$_POST["action"] == "activate")
 require("src/header.php");
 echo "<h1>Homes</h1>";
 
+function tryToInvite()
+{
+  global $db;
+  global $myHomesSelect;
+  $result = query("SELECT * FROM im_user where username='".$db->real_escape_string($_POST["username"])."'");
+  if ($result->num_rows == 0)
+    return "User to invite doesn't exist!";
+  if (query($myHomesSelect)->num_rows != 0)
+    return "You have no access to this home!";
+  query("INSERT INTO im_home_user(home_id, user_id)
+        values('{$db->real_escape_string($_POST["id"])}',
+               {$result->fetch_assoc()["id"]})");
+}
+
+if (@$_POST["action"] == "invite")
+  tryToInvite();
 
 if (@$_POST["action"] == "edit")
   query("UPDATE im_home SET name='".
@@ -100,17 +116,25 @@ if ($result->num_rows != 0)
         {$row["description"]}
       </td>
       <td>
-        <form method="post" >
+        <form method="post">
           <input type="submit" value="Delete"/>
           <input type="hidden" name="id" value="{$row["id"]}"/>
           <input type="hidden" name="action" value="delete">
         </form>
       </td>
       <td>
-        <form method="post" >
+        <form method="post">
           <input type="submit" value="Edit"/>
           <input type="hidden" name="id" value="{$row["id"]}"/>
           <input type="hidden" name="action" value="start-edit">
+        </form>
+      </td>
+      <td>
+        <form method="post">
+          <input type="text" name="username"/>
+          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="action" value="invite"/>
+          <input type="submit" value="Invite"/>
         </form>
       </td>
     </tr>
