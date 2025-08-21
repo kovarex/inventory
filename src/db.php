@@ -31,4 +31,10 @@ function query($query, $show = false)
   }
   return $result;
 }
+
+function escape($input)
+{
+  global $db;
+  return "'".$db->real_escape_string($input)."'";
+}
 ?>

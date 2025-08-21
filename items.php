@@ -1,5 +1,7 @@
 <?php
 require("src/header.php");
+require("src/transaction_log.php");
+
 echo "<h1>Items</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
@@ -9,14 +11,14 @@ function checkCategoryAndLocation()
   if (query("SELECT im_location.id
             from im_location
             where
-              im_location.id='{$db->real_escape_string($_POST["location_id"])}' and
+              im_location.id=".escape($_POST["location_id"])." and
               im_location.home_id=".homeID())->num_rows == 0)
     return false;
 
   if (query("SELECT im_category.id
             from im_category
             where
-              im_category.id='{$db->real_escape_string($_POST["category_id"])}' and
+              im_category.id=".escape($_POST["category_id"])." and
               im_category.home_id=".homeID())->num_rows == 0)
     return false;
 
@@ -31,32 +33,32 @@ if (@is_uploaded_file($_FILES["item_image"]["tmp_name"]))
 
 if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
   query("UPDATE im_item SET ".
-        "  name='".$db->real_escape_string($_POST["name"])."',".
-        "  description='".$db->real_escape_string($_POST["description"])."',".
-        "  category_id='".$db->real_escape_string($_POST["category_id"])."',".
-        "  location_id='".$db->real_escape_string($_POST["location_id"])."'".
-        (isset($contents) ?  ",image=X'".$db->real_escape_string($hexImage)."'" : "").
-        "WHERE id='".$db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+        "  name=".escape($_POST["name"]).",".
+        "  description=".escape($_POST["description"]).",".
+        "  category_id=".escape($_POST["category_id"]).",".
+        "  location_id=".escape($_POST["location_id"]).
+        (isset($contents) ?  ",image=X".escape($hexImage) : "").
+        "WHERE id=".escape($_POST["id"]).$queryRightCheck);
 
 if (@$_POST["action"] == "add" and checkCategoryAndLocation())
 {
-  query("INSERT INTO im_item(name,description,home_id,location_id,image, category_id) value('".
-        $db->real_escape_string($_POST["name"])."','".
-        $db->real_escape_string($_POST["description"])."',".
+  query("INSERT INTO im_item(name,description,home_id,location_id,image, category_id)
+        value(".
+        escape($_POST["name"]).",".
+        escape($_POST["description"]).",".
         homeID().",".
-        "'".$db->real_escape_string($_POST["location_id"])."',".
-        (isset($contents) ?  "X'".$db->real_escape_string($hexImage)."'" : "NULL").",".
-        "'".$db->real_escape_string($_POST["category_id"])."')", true);
+        escape($_POST["location_id"]).",".
+        (isset($contents) ?  "X".escape($hexImage) : "NULL").",".
+        escape($_POST["category_id"]).")");
+  itemCreated($_POST["location_id"], $_POST["comment"]);
 }
 if (@$_POST["action"] == "delete")
-  query("DELETE FROM im_item where id='".
-        $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+  query("DELETE FROM im_item where id=".escape($_POST["id"]).$queryRightCheck);
 
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
 {
-  $result = query("SELECT * FROM im_item where id='".
-                  $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+  $result = query("SELECT * FROM im_item where id=".escape($_POST["id"]).$queryRightCheck);
   $itemToEdit = $result->fetch_assoc();
   $formAction = "edit";
 }
@@ -121,6 +123,10 @@ if (@$_POST["action"] == "start-edit")
       <td>
         <input type="file" name="item_image"/>
       </td>
+    </tr>
+    <tr>
+      <td><?= $formAction == "add" ? "Creation comment" : "Move comment" ?></td>
+      <td><input type="text" name="comment"/></td>
     </tr>
   </table>
   <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Edit" ?>"/>
