@@ -13,10 +13,10 @@ if (@$_POST["action"] == "edit")
         ."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add")
-  query("INSERT INTO im_location(name,description,home_id,parent_location_id) value('".
-        $db->real_escape_string($_POST["name"])."','".
-        $db->real_escape_string($_POST["description"])."',".
+  query("INSERT INTO im_item(home_id, name,description,parent_location_id) value(".
         homeID().",'".
+        $db->real_escape_string($_POST["name"])."','".
+        $db->real_escape_string($_POST["description"])."','".
         $db->real_escape_string($_POST["parent_id"])."')");
 
 if (@$_POST["action"] == "delete")
