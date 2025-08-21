@@ -4,16 +4,14 @@ echo "<h1>Locations</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
 if (@$_POST["action"] == "edit")
-  query("UPDATE im_location SET name='".
-        $db->real_escape_string($_POST["name"])."',
-        description='".
-        $db->real_escape_string($_POST["description"]).
-        "' WHERE id='".
-        $db->real_escape_string($_POST["id"])
-        ."'".$queryRightCheck);
+  query("UPDATE im_location SET
+          name='".$db->real_escape_string($_POST["name"])."',
+          description='".$db->real_escape_string($_POST["description"])."',
+          parent_location_id='".$db->real_escape_string($_POST["parent_id"])."'
+        WHERE id='".$db->real_escape_string($_POST["id"])."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add")
-  query("INSERT INTO im_item(home_id, name,description,parent_location_id) value(".
+  query("INSERT INTO im_location(home_id, name,description,parent_location_id) value(".
         homeID().",'".
         $db->real_escape_string($_POST["name"])."','".
         $db->real_escape_string($_POST["description"])."','".
