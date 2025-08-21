@@ -22,7 +22,7 @@ function tryToRegister($username, $password, $email)
 
   query("INSERT INTO im_user(username, password, email)
         values('{$db->real_escape_string($username)}',
-               '{$db->real_escape_string(password_hash($password))}',
+               '{$db->real_escape_string(password_hash($password, PASSWORD_DEFAULT))}',
                '{$db->real_escape_string($email)}')", true);
 
   $_SESSION["user"] = query("SELECT * FROM im_user where username='{$db->real_escape_string($username)}'")->fetch_assoc();
