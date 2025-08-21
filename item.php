@@ -12,7 +12,7 @@ $result = query("SELECT
                    im_item.description,
                    parent_location.name as location_name,
                    im_category.name as category_name,
-                   im_item.image
+                   length(im_item.image) as image_size
                  FROM im_category, im_item
                  left join im_location parent_location on im_item.location_id=parent_location.id
                  where im_item.category_id = im_category.id and im_item.home_id=".homeID().
@@ -43,8 +43,10 @@ echo "<h1>Item: ".$item["name"]."</h1>";
       <td><?= @$item['location_name'] ?></td>
     </tr>
   </table>
-<img src="image.php?source=item&id=<?= $item['id']?>"/>
+<?php
+if ($item['image_size'] > 0)
+  echo "<img src=\"image.php?source=item&id={$item['id']}\"/>";
 
-<?php require("src/footer.php"); ?>
+require("src/footer.php"); ?>
 
 
