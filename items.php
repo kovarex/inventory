@@ -32,6 +32,9 @@ if (@is_uploaded_file($_FILES["item_image"]["tmp_name"]))
 }
 
 if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
+{
+  $beforeChange = query("SELECT * FROM im_item where im_item.id=".escape($_POST["id"]))->fetch_assoc();
+
   query("UPDATE im_item SET ".
         "  name=".escape($_POST["name"]).",".
         "  description=".escape($_POST["description"]).",".
@@ -39,6 +42,9 @@ if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
         "  location_id=".escape($_POST["location_id"]).
         (isset($contents) ?  ",image=X".escape($hexImage) : "").
         "WHERE id=".escape($_POST["id"]).$queryRightCheck);
+  if (!empty($beforeChange["location_id"]) and !empty($_POST["location_id"]))
+    itemMoved($_POST["id"], $beforeChange["location_id"], $_POST["location_id"], $_POST["comment"]);
+}
 
 if (@$_POST["action"] == "add" and checkCategoryAndLocation())
 {
