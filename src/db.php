@@ -17,9 +17,11 @@ function multi_query_and_clear($query)
   }
 }
 
-function query($query)
+function query($query, $show = false)
 {
   global $db;
+  if ($show)
+    echo "Debug query: ".$query;
   $result = $db->query($query);
   if (!empty($db->error))
   {

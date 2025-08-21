@@ -32,13 +32,22 @@ if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
         "WHERE id='".$db->real_escape_string($_POST["id"])."'".$queryRightCheck);
 
 if (@$_POST["action"] == "add" and checkCategoryAndLocation())
-  query("INSERT INTO im_item(name,description,home_id,location_id,category_id) value('".
+{
+  if (@is_uploaded_file($_FILES["item_image"]["tmp_name"]))
+  {
+    echo "Size: ".$_FILES["item_image"]["size"];
+    $contents = file_get_contents($_FILES["item_image"]["tmp_name"]);
+    $hexImage = bin2hex($contents);
+  }
+
+  query("INSERT INTO im_item(name,description,home_id,location_id,image, category_id) value('".
         $db->real_escape_string($_POST["name"])."','".
         $db->real_escape_string($_POST["description"])."',".
-        homeID().",'".
-        $db->real_escape_string($_POST["location_id"])."','".
-        $db->real_escape_string($_POST["category_id"])."')");
-
+        homeID().",".
+        "'".$db->real_escape_string($_POST["location_id"])."',".
+        (isset($contents) ?  "X'".$db->real_escape_string($hexImage)."'" : "NULL").",".
+        "'".$db->real_escape_string($_POST["category_id"])."')", true);
+}
 if (@$_POST["action"] == "delete")
   query("DELETE FROM im_item where id='".
         $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
@@ -53,9 +62,7 @@ if (@$_POST["action"] == "start-edit")
 }
 ?>
 
-
-
-<form method="post">
+<form method="post" enctype="multipart/form-data">
   <input type="hidden" name="action" value="<?= $formAction ?>"/>
   <input type='hidden' name='id' value="<?= @$itemToEdit['id'] ?>"/>
   <table>
@@ -110,9 +117,9 @@ if (@$_POST["action"] == "start-edit")
         </select>
     </tr>
     <tr>
-      <td><label for="image">Image:</label></td>
+      <td><label for="item_image">Image:</label></td>
       <td>
-        <input type="file"/>
+        <input type="file" name="item_image"/>
       </td>
     </tr>
   </table>
