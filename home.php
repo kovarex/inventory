@@ -81,7 +81,14 @@ if (@$_POST["action"] == "start-edit")
 <?php
 
 
-$result = query("SELECT im_home.* FROM im_home,im_home_user where im_home.id=im_home_user.home_id and im_home_user.user_id=".userID());
+$result = query("SELECT im_home.*, GROUP_CONCAT(other_user.username SEPARATOR ', ') as other_users
+                FROM im_home,im_home_user, im_home_user as other_home_user, im_user as other_user
+                where
+                  other_home_user.home_id=im_home.id and
+                  other_home_user.user_id=other_user.id and
+                  im_home.id=im_home_user.home_id and
+                  im_home_user.user_id=".userID()."
+                GROUP BY im_home.id");
 
 function activeColumn($row)
 {
@@ -98,7 +105,7 @@ HTML;
 
 if ($result->num_rows != 0)
 {
-  echo "<table class='data-table'><tr><th>State</th><th>Name</th><th>Description</th></tr>";
+  echo "<table class='data-table'><tr><th>State</th><th>Name</th><th>Description</th><th>Users</th></tr>";
 
   while($row = $result->fetch_assoc())
   {
@@ -115,6 +122,7 @@ if ($result->num_rows != 0)
       <td>
         {$row["description"]}
       </td>
+      <td>{$row["other_users"]}</td>
       <td>
         <form method="post">
           <input type="submit" value="Delete"/>
