@@ -1,2 +1,4 @@
 .data-table td{border:solid 1px;}
 .data-table {border-collapse:collapse;}
+
+.search-form {display: inline;}

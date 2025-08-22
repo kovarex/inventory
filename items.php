@@ -183,8 +183,24 @@ if (@$_POST["action"] == "start-edit")
   </table>
   <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Edit" ?>"/>
 </form>
-
+<hr>
+<form method=get class="search-form">
+  <input type="text" name="search" value="<?= @htmlspecialchars(@$_GET['search']) ?>"/>
+  <input type=hidden name="action" value="search"/>
+  <input type=submit value="Search"/>
+</form>
 <?php
+if (@$_GET['action']==="search") {
+  echo <<<HTML
+<form method=get class="search-form">
+  <input type=submit value="X"/>
+</form>
+HTML;
+  $searchQuery=$db->real_escape_string($_GET['search']);
+  $searchSQL=" AND (im_item.name LIKE '%{$searchQuery}%' OR im_item.description LIKE '%{$searchQuery}%')";
+} else {
+  $searchSQL="";
+}
 
 $result = query("SELECT
                    im_item.id,
@@ -195,7 +211,7 @@ $result = query("SELECT
                    length(im_item.image) as image_size
                  FROM im_category, im_item
                  left join im_location parent_location on im_item.location_id=parent_location.id
-                 where im_item.category_id = im_category.id and im_item.home_id=".homeID());
+                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().$searchSQL);
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
