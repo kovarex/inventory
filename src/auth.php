@@ -6,7 +6,7 @@ if (empty($_SESSION["user"]))
   die();
 }
 
-if (!$homeNotRequired and empty($_SESSION["home"]))
+if (@!$homeNotRequired and empty($_SESSION["home"]))
 {
   header("Location: home.php");
   die();

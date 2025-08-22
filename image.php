@@ -13,11 +13,16 @@ else
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
 
+if (@$_GET["type"] == "thumbnail")
+  $sourceTableColumn = "thumbnail";
+else
+  $sourceTableColumn = "image";
+
 $id = $db->real_escape_string($_GET["id"]);
-$result = query("SELECT image FROM $sourceTableName where id='$id' and home_id=".homeID());
+$result = query("SELECT $sourceTableColumn FROM $sourceTableName where id='$id' and home_id=".homeID());
 if ($result->num_rows == 0)
   die("Image not found!");
-$image = $result->fetch_assoc()["image"];
+$image = $result->fetch_assoc()[$sourceTableColumn];
 header("Content-type: image/jpeg");
 echo $image;
 ?>

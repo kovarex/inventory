@@ -44,6 +44,7 @@ echo "<h1>Item: ".$item["name"]."</h1>";
     </tr>
   </table>
 <?php
+
 if ($item['image_size'] > 0)
   echo "<img src=\"image.php?source=item&id={$item['id']}\"/>";
 

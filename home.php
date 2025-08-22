@@ -4,7 +4,7 @@ require_once("src/db.php");
 require_once("src/auth.php");
 
 $myHomesSelect = "SELECT * from im_home_user where im_home_user.home_id='".
-                    $db->real_escape_string($_POST["id"])."' and im_home_user.user_id=".userID();
+                    $db->real_escape_string(@$_POST["id"])."' and im_home_user.user_id=".userID();
 $queryRightCheck = "and exists(".$myHomesSelect.")";
 if (@$_POST["action"] == "activate")
 {

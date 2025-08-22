@@ -32,8 +32,8 @@ function checkLogout($action)
 
 require("src/db.php");
 session_start();
-checkLogout($_POST['action']);
-$loginResult = checkLogin($_POST['username'], $_POST['password']);
+checkLogout(@$_POST['action']);
+$loginResult = checkLogin(@$_POST['username'], @$_POST['password']);
 
 if ($loginResult === true)
 {
