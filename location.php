@@ -24,62 +24,107 @@ echo "<h1>Location: ".$item["name"]."</h1>";
 <?= @$item['description'] ?>
 <?php
 
-$rows = query("SELECT
-                  im_item.*
-                FROM im_item
-                WHERE im_item.location_id=$id")->fetch_all(MYSQLI_ASSOC);
-if (count($rows) != 0)
+$structuredData["name"] = $item["name"];
+$locationPointers[$item["id"]] = &$structuredData;
+
+function addToStructuredData($flatData)
 {
-  echo "<table class=\"data-table\"><tr><th>Name</th></tr>";
-  foreach($rows as $row)
+  global $structuredData;
+  global $locationPointers;
+
+  foreach($flatData as $row)
   {
-    echo "<tr><td>";
-    echo "<a href=\"item.php?id=".$row["id"]."\">".$row["name"]."</a>";
-    echo "</td></tr>";
+    $root = &$locationPointers[$row["item_location_id"]];
+    assert(!empty($root));
+    $root["items"][$row["item_id"]]["name"] = $row["item_name"];
+    $root["items"][$row["item_id"]]["description"] = $row["item_description"];
   }
-  echo "</table>";
 }
-/*
-log will be here
-$result = query("SELECT
-                       im_transaction.*,
-                       from_location.name as from_location_name,
-                       to_location.name as to_location_name,
-                       parent_from_location.name as parent_from_location_name,
-                       parent_to_location.name as parent_to_location_name,
-                       parent_location.name as parent_location_name FROM im_transaction
-                 LEFT JOIN im_location from_location ON from_location.id=im_transaction.from_location_id
-                 LEFT JOIN im_location to_location ON to_location.id=im_transaction.to_location_id
-                 LEFT JOIN im_location parent_from_location ON parent_from_location.id=im_transaction.parent_from_location_id
-                 LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
-                 LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
-                 WHERE from_location_id=$id or to_location_id=$id");
 
-$rows = $result->fetch_all(MYSQLI_ASSOC);
-
-if (count($rows) != 0)
+function buildLocationStructure($flatLocationData)
 {
-?>
-  <table class="data-table">
-    <tr>
-      <th>Transaction</th><th>Comment</th>
-    </tr>
-  <?php
-    foreach($rows as $row)
+  global $structuredData;
+  global $locationPointers;
+
+  foreach($flatLocationData as $row)
+  {
+    $parent = &$structuredData;
+    for ($i = 1; $i <= 3; $i++)
     {
-      echo "<tr><td>";
-      if (empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "in ".$row["to_location_name"];
-      else if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "Moved from ".$row["from_location_name"]." to ".$row["to_location_name"];
-      else
-        echo "Unknown operation";
-      echo "</td><td>".$row["comment"]."</td>";
-      echo "</tr>";
+      $locationID = $row["level{$i}_location_id"];
+      if (!empty($locationID))
+      {
+        $parent["locations"][$locationID]["name"] = $row["level{$i}_location_name"];
+        $parent = &$parent["locations"][$locationID];
+        $locationPointers[$locationID] = &$parent;
+      }
     }
-  ?>
-  </table>*/
+  }
+}
+
+$flatLocationData = query("SELECT
+                            level1_location.id as level1_location_id,
+                            level1_location.name as level1_location_name,
+                            level2_location.id as level2_location_id,
+                            level2_location.name as level2_location_name,
+                            level3_location.id as level3_location_id,
+                            level3_location.name as level3_location_name
+                           FROM
+                             im_location as level1_location left join
+                             im_location as level2_location on level2_location.parent_location_id = level1_location.id left join
+                             im_location as level3_location on level3_location.parent_location_id = level2_location.id
+                           WHERE
+                             level1_location.parent_location_id=$id")->fetch_all(MYSQLI_ASSOC);
+
+buildLocationStructure($flatLocationData);
+foreach($locationPointers as $key=>$row)
+  if (empty($locationList))
+    $locationList = $key;
+  else
+    $locationList .= ",".$key;
+
+$flatData = query("SELECT
+                  im_item.id as item_id,
+                  im_item.name as item_name,
+                  im_item.description as item_description,
+                  im_item.location_id as item_location_id
+                FROM
+                  im_item, im_location
+                WHERE
+                  im_item.location_id in ($locationList)")->fetch_all(MYSQLI_ASSOC);
+addToStructuredData($flatData);
+
+if (count($structuredData) != 0)
+{
+  function show($parentID, $structuredData)
+  {
+    if (empty($structuredData))
+      return;
+
+    echo "<li><a href=\"location.php?id=".$parentID."\"/>".$structuredData["name"]."</a>";
+    if (!empty($structuredData["items"]))
+    {
+      echo "<ul>";
+      foreach($structuredData["items"] as $key=>$row)
+        echo "<li><a href=\"item.php?id=".$key."\">".$row["name"]."</a></li>";
+      echo "</ul>";
+    }
+    if (!empty($structuredData["locations"]))
+    {
+      echo "<ul>";
+      foreach($structuredData["locations"] as $key=>$row)
+        show($key, $row);
+      echo "</ul>";
+    }
+    echo "</li>";
+  }
+
+  echo "<ul>";
+  show($item["id"], $structuredData);
+  echo "</ul>";
+}
 ?>
+
 <?php require("src/footer.php"); ?>
 
 
