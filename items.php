@@ -228,7 +228,7 @@ if (count($rows) != 0)
       <td>'.$row["description"].'</td>
       <td>'.$row["category_name"].'</td>
       <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
-      <td>$image</td>
+      <td>'.$image.'</td>
       <td>
         <form method="post">
           <input type="submit" value="Delete"/>
