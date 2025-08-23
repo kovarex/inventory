@@ -101,12 +101,12 @@ if (count($structuredData) != 0)
     if (empty($structuredData))
       return;
 
-    echo "<li><a href=\"location.php?id=".$parentID."\"/>".$structuredData["name"]."</a>";
+    echo "<li>".locationLink($parentID, $structuredData["name"]);
     if (!empty($structuredData["items"]))
     {
       echo "<ul>";
       foreach($structuredData["items"] as $key=>$row)
-        echo "<li><a href=\"item.php?id=".$key."\">".$row["name"]."</a></li>";
+        echo "<li>".itemLink($key, $row["name"])."</li>";
       echo "</ul>";
     }
     if (!empty($structuredData["locations"]))

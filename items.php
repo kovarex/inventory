@@ -206,7 +206,8 @@ $result = query("SELECT
                    im_item.id,
                    im_item.name,
                    im_item.description,
-                   parent_location.name as parent_name,
+                   parent_location.id as parent_location_id,
+                   parent_location.name as parent_location_name,
                    im_category.name as category_name,
                    length(im_item.image) as image_size
                  FROM im_category, im_item
@@ -220,39 +221,29 @@ if (count($rows) != 0)
   foreach($rows as $row)
   {
     $image = ($row['image_size'] > 0) ? "<img src=\"image.php?source=item&id={$row['id']}&type=thumbnail\"/>" : "";
-    echo <<<HTML
+    echo '
     <tr>
-      <td>
-        <a href="item.php?id={$row["id"]}"/>{$row["name"]}</a>
+      <td>'.itemLink($row["id"], $row["name"]).'</a>
       </td>
+      <td>'.$row["description"].'</td>
+      <td>'.$row["category_name"].'</td>
+      <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
+      <td>$image</td>
       <td>
-        {$row["description"]}
-      </td>
-      <td>
-        {$row["category_name"]}
-      </td>
-      <td>
-        {$row["parent_name"]}
-      </td>
-      <td>
-        {$image}
-      </td>
-      <td>
-        <form method="post" >
+        <form method="post">
           <input type="submit" value="Delete"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="id" value="'.$row["id"].'"/>
           <input type="hidden" name="action" value="delete">
         </form>
       </td>
       <td>
         <form method="post" >
           <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="id" value="'.$row["id"].'"/>
           <input type="hidden" name="action" value="start-edit">
         </form>
       </td>
-    </tr>
-  HTML;
+    </tr>';
   }
 }
 

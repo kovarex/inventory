@@ -1,6 +1,7 @@
 <?php
 require_once("src/db.php");
 require_once("src/auth.php");
+require("src/link_helper.php");
 require("src/header_internal.php");
 
 assert(!empty($_SESSION["user"]));
