@@ -93,7 +93,7 @@ if (count($rows) != 0)
 ?>
   <table class="data-table">
     <tr>
-      <th>Transaction</th><th>Comment</th><th>User</th>
+      <th>Transaction</th><th>Comment</th><th>User</th><th>Timestamp</th>
     </tr>
   <?php
     foreach($rows as $row)
@@ -112,6 +112,7 @@ if (count($rows) != 0)
         echo "Unknown operation";
       echo "</td><td>".$row["comment"]."</td>";
       echo "<td>".$row["user_name"]."</td>";
+      echo "<td>".$row["timestamp"]."</td>";
       echo "</tr>";
     }
   ?>
