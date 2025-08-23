@@ -30,8 +30,6 @@ echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;displa
 itemForm("edit", $item, "item.php?id=".$_GET["id"]);
 echo "</div>";
 
-
-
 echo "<h1>Item: ".$item["name"]."<button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></h1>";
 ?>
 <script type="text/javascript">
@@ -84,7 +82,8 @@ $result = query("SELECT
                  LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
                  LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
                  LEFT JOIN im_user ON im_user.id=im_transaction.user_id
-                 WHERE item_id=$id");
+                 WHERE item_id=$id
+                 ORDER BY im_transaction.timestamp");
 
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
