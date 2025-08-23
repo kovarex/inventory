@@ -24,5 +24,7 @@ if ($result->num_rows == 0)
   die("Image not found!");
 $image = $result->fetch_assoc()[$sourceTableColumn];
 header("Content-type: image/jpeg");
+header('Cache-control: max-age='.(60*60*24*365));
+header('Expires: '.gmdate(DATE_RFC1123,time() + 60*60*24*365));
 echo $image;
 ?>
