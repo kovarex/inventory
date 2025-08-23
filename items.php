@@ -65,7 +65,7 @@ if (count($rows) != 0)
     echo '
     <tr>
       <td>'.itemLink($row["id"], itemImage($row['id'], $row['image_size'] > 0)).'</td>
-      <td>'.itemLink($row["id"], $row["name"]).'</a>
+      <td>'.itemLink($row["id"], $row["name"]).'
       </td>
       <td>'.$row["description"].'</td>
       <td>'.categoryLink($row["category_id"], $row["category_name"]).'</td>

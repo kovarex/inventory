@@ -36,7 +36,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
       <td><input type="text" name="description" value="<?= @$itemToEdit['description'] ?>"/></td>
     </tr>
     <tr>
-      <td><label for="category_id">Category:<label</td>
+      <td><label for="category_id">Category:</label></td>
       <td>
         <select name="category_id">
         <?php
@@ -50,7 +50,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
 
           foreach($rows as $row)
           {
-            $selected = $row["id"] == $itemToEdit["category_id"] ? " selected" : "";
+            $selected = $row["id"] == @$itemToEdit["category_id"] ? " selected" : "";
             echo "<option value='{$row["id"]}'{$selected}>{$row["name"]}</option>";
           }
         ?>
@@ -61,7 +61,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     {
     ?>
     <tr>
-      <td><label for="location_id">Location:<label</td>
+      <td><label for="location_id">Location:</label></td>
       <td>
         <select name="location_id">
         <?php
@@ -75,11 +75,12 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
 
           foreach($rows as $row)
           {
-            $selected = $row["id"] == $itemToEdit["location_id"] ? " selected" : "";
+            $selected = $row["id"] == @$itemToEdit["location_id"] ? " selected" : "";
             echo "<option value='{$row["id"]}'{$selected}>{$row["name"]}</option>";
           }
         ?>
         </select>
+      </td>
     </tr> <?php
     }
     else
@@ -88,7 +89,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     <tr>
       <td><label for="item_image">Image:</label></td>
       <td>
-        <input type="file" name="item_image"/>
+        <input type="file" name="item_image" accept="image/*" capture="camera">
       </td>
     </tr>
     <tr>
