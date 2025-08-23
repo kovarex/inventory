@@ -7,6 +7,8 @@ if (!isset($_GET["source"]))
 
 if ($_GET["source"] == "item")
   $sourceTableName = "im_item";
+elseif ($_GET["source"] == "location")
+  $sourceTableName = "im_location";
 else
   die("Unknown source type: ".$_GET["source"]);
 

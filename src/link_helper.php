@@ -21,4 +21,11 @@ function itemImage($id, $generate)
   return "<img src=\"image.php?source=item&id=".$id."&type=thumbnail\"/>";
 }
 
+function locationImage($id, $generate)
+{
+  if (!$generate)
+    return "";
+  return "<img src=\"image.php?source=location&id=".$id."&type=thumbnail\"/>";
+}
+
 ?>

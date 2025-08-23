@@ -2,10 +2,10 @@
 
 function tryToProcessImageUpload()
 {
-  if (@!is_uploaded_file($_FILES["item_image"]["tmp_name"]))
+  if (@!is_uploaded_file($_FILES["image"]["tmp_name"]))
     return;
 
-  $imageFileName = $_FILES["item_image"]["tmp_name"];
+  $imageFileName = $_FILES["image"]["tmp_name"];
   $imageInfo = @getimagesize($imageFileName);
   if ($imageInfo === false)
   {

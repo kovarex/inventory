@@ -44,6 +44,8 @@ CREATE TABLE IF NOT EXISTS `im_location` (
   `parent_location_id` int(11) default NULL,
   `name` varchar(512) collate utf8_czech_ci NOT NULL,
   `description` varchar(512) collate utf8_czech_ci default NULL,
+  `image` longblob,
+  `thumbnail` longblob
   PRIMARY KEY  (`id`),
   KEY `parent_location_id` (`parent_location_id`),
   KEY `home_id` (`home_id`)

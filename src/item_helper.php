@@ -87,10 +87,8 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
       echo "<input type=\"hidden\" name=\"location_id\" value=\"".$predefinedLocation."\"/>";
     ?>
     <tr>
-      <td><label for="item_image">Image:</label></td>
-      <td>
-        <input type="file" name="item_image" accept="image/*" capture="camera">
-      </td>
+      <td><label for="image">Image:</label></td>
+      <td><input type="file" name="image" accept="image/*" capture="camera"></td>
     </tr>
     <tr>
       <td><?= $formAction == "add" ? "Creation comment" : "Move comment" ?></td>

@@ -1,9 +1,12 @@
 <?php
 require("src/header.php");
+require("src/image_upload_helper.php");
 require_once("src/transaction_log.php");
 
 echo "<h1>Locations</h1>";
 $queryRightCheck = " and home_id=".homeID();
+
+$imageData = tryToProcessImageUpload();
 
 if (@$_POST["action"] == "edit") {
   $locationID = $db->real_escape_string($_POST["id"]);
@@ -26,19 +29,23 @@ if (@$_POST["action"] == "edit") {
     $updated = query("UPDATE im_location SET
                         name=".escape($_POST["name"]).",
                         description=".escape($_POST["description"]).",
-                        parent_location_id=".escape($_POST["parent_id"])."
-                      WHERE id=".escape($_POST["id"]).$queryRightCheck);
+                        parent_location_id=".escape($_POST["parent_id"]).
+                        (isset($imageData) ? ",image=X".escape($imageData["big"]) : "").
+                        (isset($imageData) ? ",thumbnail=X".escape($imageData["thumbnail"]) : "").
+                     " WHERE id=".escape($_POST["id"]).$queryRightCheck);
     if ($updated && $oldParentLocation != $_POST["parent_id"])
       locationMoved($locationID, $oldParentLocation, $_POST["parent_id"], $_POST["comment"], $locationChildren);
   }
 }
 
 if (@$_POST["action"] == "add")
-  query("INSERT INTO im_location(home_id, name,description,parent_location_id) value(".
-        homeID().",'".
-        $db->real_escape_string($_POST["name"])."','".
-        $db->real_escape_string($_POST["description"])."','".
-        $db->real_escape_string($_POST["parent_id"])."')");
+  query("INSERT INTO im_location(home_id, name,description,parent_location_id, image, image_data) value(".
+        homeID().",".
+        escape($_POST["name"]).",".
+        escape($_POST["description"]).",".
+        escape($_POST["parent_id"]).
+        (isset($imageData) ?  "X".escape($imageData["big"]) : "NULL").",".
+        (isset($imageData) ?  "X".escape($imageData["thumbnail"]) : "NULL").")");
 
 if (@$_POST["action"] == "delete")
   query("DELETE FROM im_location where id='".
@@ -47,23 +54,28 @@ if (@$_POST["action"] == "delete")
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
 {
-  $result = query("SELECT * FROM im_location where id='".
-                  $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
-  $locationToEdit = $result->fetch_assoc();
+  $locationToEdit = query("SELECT * FROM im_location where id=".escape($_POST["id"]).$queryRightCheck)->fetch_assoc();
   $formAction = "edit";
 }
 ?>
 
 <?php
 
-$result = $db->query("SELECT im_location.id, im_location.name, im_location.description, parent_location.name as parent_name FROM im_location ".
+$result = $db->query("SELECT
+                        im_location.id,
+                        im_location.name,
+                        im_location.description,
+                        parent_location.name as parent_name,
+                        parent_location.id as parent_id,
+                        length(im_location.image) > 0 as has_image
+                      FROM im_location ".
                      "left join im_location parent_location on im_location.parent_location_id=parent_location.id ".
                      "where im_location.home_id=".homeID());
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 ?>
 
-<form method="post">
+<form method="post" enctype="multipart/form-data">
   <input type="hidden" name="action" value="<?= $formAction ?>"/>
   <input type='hidden' name='id' value="<?= @$locationToEdit['id'] ?>"/>
   <table>
@@ -74,6 +86,10 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
     <tr>
       <td><label for="description">Description:</label></td>
       <td><input type="text" name="description" value="<?= @$locationToEdit['description'] ?>"/></td>
+    </tr>
+    <tr>
+      <td><label for="image">Image:</label></td>
+      <td><input type="file" name="image" accept="image/*" capture="camera"></td>
     </tr>
     <tr>
       <td><label for="parent_id">Parent:<label</td>
@@ -106,36 +122,31 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
 {
-  echo "<table class='data-table'><tr><th>Name</th><th>Description</th><th>Parent</th></tr>";
+  echo "<table class='data-table'><tr><th>Image</th><th>Name</th><th>Description</th><th>Parent</th</tr>";
   foreach($rows as $row)
   {
-    echo <<<HTML
+    echo '
     <tr>
-      <td>
-        <a href="location.php?id={$row["id"]}">{$row["name"]}</a>
+      <td>'.locationLink($row["id"], locationImage($row["id"], $row["has_image"])).'
+      <td>'.locationLink($row["id"], $row["name"]).'</a></td>
+      <td>'.$row["description"].'
       </td>
-      <td>
-        {$row["description"]}
-      </td>
-      <td>
-        {$row["parent_name"]}
-      </td>
+      <td>'.locationLink($row["parent_id"], $row["parent_name"]).'</td>
       <td>
         <form method="post" >
           <input type="submit" value="Delete"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="id" value="'.$row["id"].'"/>
           <input type="hidden" name="action" value="delete">
         </form>
       </td>
       <td>
         <form method="post" >
           <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
+          <input type="hidden" name="id" value="'.$row["id"].'"/>
           <input type="hidden" name="action" value="start-edit">
         </form>
       </td>
-    </tr>
-  HTML;
+    </tr>';
   }
 }
 
