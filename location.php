@@ -37,8 +37,10 @@ function addToStructuredData($flatData)
   {
     $root = &$locationPointers[$row["item_location_id"]];
     assert(!empty($root));
-    $root["items"][$row["item_id"]]["name"] = $row["item_name"];
-    $root["items"][$row["item_id"]]["description"] = $row["item_description"];
+    $itemRef = &$root["items"][$row["item_id"]];
+    $itemRef["name"] = $row["item_name"];
+    $itemRef["description"] = $row["item_description"];
+    $itemRef["has_image"] = $row["has_image"];
   }
 }
 
@@ -76,7 +78,8 @@ $flatData = query("SELECT
                   im_item.id as item_id,
                   im_item.name as item_name,
                   im_item.description as item_description,
-                  im_item.location_id as item_location_id
+                  im_item.location_id as item_location_id,
+                  length(im_item.image) > 0 as has_image
                 FROM
                   im_item, im_location
                 WHERE
@@ -95,7 +98,7 @@ if (count($structuredData) != 0)
     {
       echo "<ul>";
       foreach($structuredData["items"] as $key=>$row)
-        echo "<li>".itemLink($key, $row["name"])."</li>";
+        echo "<li style=\" display: flex;flex-direction: row;align-items: center;\">".($row["has_image"] ? itemLink($key, itemImage($key, $row["name"])) : "").itemLink($key, $row["name"])."</li>";
       echo "</ul>";
     }
     if (!empty($structuredData["locations"]))
