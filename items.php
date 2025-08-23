@@ -166,6 +166,7 @@ $result = query("SELECT
                    im_item.description,
                    parent_location.id as parent_location_id,
                    parent_location.name as parent_location_name,
+                   im_category.id as category_id,
                    im_category.name as category_name,
                    length(im_item.image) as image_size
                  FROM im_category, im_item
@@ -183,7 +184,7 @@ if (count($rows) != 0)
       <td>'.itemLink($row["id"], $row["name"]).'</a>
       </td>
       <td>'.$row["description"].'</td>
-      <td>'.$row["category_name"].'</td>
+      <td>'.categoryLink($row["category_id"], $row["category_name"]).'</td>
       <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
       <td>'.itemLink($row["id"], itemImage($row['id'], $row['image_size'] > 0)).'</td>
       <td>
