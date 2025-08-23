@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `im_category` (
   `description` varchar(512) collate utf8_czech_ci default NULL,
   PRIMARY KEY  (`id`),
   KEY `home_id` (`home_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=11 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 
 CREATE TABLE IF NOT EXISTS `im_home` (
@@ -14,7 +14,7 @@ CREATE TABLE IF NOT EXISTS `im_home` (
   `description` varchar(512) collate utf8_czech_ci NOT NULL,
   `image` longblob,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=15 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1
 
 
 CREATE TABLE IF NOT EXISTS `im_home_user` (
@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `im_item` (
   KEY `location_id` (`location_id`,`category_id`),
   KEY `im_item_im_category_FK` (`category_id`),
   KEY `home_id` (`home_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=17 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `im_location` (
   `id` int(11) NOT NULL auto_increment,
@@ -49,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `im_location` (
   PRIMARY KEY  (`id`),
   KEY `parent_location_id` (`parent_location_id`),
   KEY `home_id` (`home_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=16 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 
 CREATE TABLE IF NOT EXISTS `im_transaction` (
@@ -69,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `im_transaction` (
   KEY `im_transcation_im_location_to_FK` (`to_location_id`),
   KEY `user_id` (`user_id`),
   KEY `parent_location_id` (`parent_location_id`,`parent_from_location_id`,`parent_to_location_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=10 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `im_user` (
   `id` int(11) NOT NULL auto_increment,
@@ -79,5 +79,6 @@ CREATE TABLE IF NOT EXISTS `im_user` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=11 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
+ALTER TABLE im_item ADD FOREIGN KEY (location_id) REFERENCES im_location(id);
