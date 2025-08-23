@@ -1,5 +1,6 @@
 <?php
 require("config.php");
+require_once("constants.php");
 
 $db = new mysqli($dbServer, $dbUser, $dbPassword, $dbName);
 if ($db->connect_error)
@@ -39,18 +40,34 @@ function escape($input)
 }
 
 function locationChildren($id) {
-  return query("SELECT
-                level1_location.id as level1_location_id,
-                level1_location.name as level1_location_name,
-                level2_location.id as level2_location_id,
-                level2_location.name as level2_location_name,
-                level3_location.id as level3_location_id,
-                level3_location.name as level3_location_name
-                FROM
-                  im_location as level1_location left join
-                  im_location as level2_location on level2_location.parent_location_id = level1_location.id left join
-                  im_location as level3_location on level3_location.parent_location_id = level2_location.id
-                WHERE
-                  level1_location.parent_location_id=$id")->fetch_all(MYSQLI_ASSOC);
+  $columns=[];
+  $joins=["im_location as level1_location"];
+  for ($f=1;$f<=LOCATION_CHILDREN_DEPTH;$f++) {
+    $columns[]="level{$f}_location.id as level{$f}_location_id,
+                level{$f}_location.name as level{$f}_location_name";
+    if ($f>1) $joins[]="im_location as level{$f}_location on level{$f}_location.parent_location_id = level".($f-1)."_location.id";
+  }
+  return query("SELECT 
+               ".implode(",",$columns)." 
+               FROM 
+               ".implode(" left join ",$joins). " 
+               WHERE level1_location.parent_location_id='".$id."'")->fetch_all(MYSQLI_ASSOC);
+}
+
+function locationChildrenFlat($id) {
+  $children = locationChildren($id);
+  $flatLocations=[$id];
+  foreach($children as $row)
+  {
+    for ($i = 1; $i <= LOCATION_CHILDREN_DEPTH; $i++)
+    {
+      $locationID = $row["level{$i}_location_id"];
+      if (!empty($locationID))
+      {
+        $flatLocations[] = $locationID;
+      }
+    }
+  }
+  return $flatLocations;
 }
 ?>

@@ -6,14 +6,31 @@ echo "<h1>Locations</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
 if (@$_POST["action"] == "edit") {
+  $locationID = $db->real_escape_string($_POST["id"]);
   $oldParentLocation=query("SELECT parent_location_id FROM im_location WHERE id=".escape($_POST["id"]))->fetch_assoc()["parent_location_id"];
-  $updated=query("UPDATE im_location SET
-                    name=".escape($_POST["name"]).",
-                    description=".escape($_POST["description"]).",
-                    parent_location_id=".escape($_POST["parent_id"])."
-                  WHERE id=".escape($_POST["id"]).$queryRightCheck);
-  if ($updated && $oldParentLocation != $_POST["parent_id"])
-    locationMoved($db->real_escape_string($_POST["id"]),$oldParentLocation,$db->real_escape_string($_POST["parent_id"]),"");
+  $locationChildren = locationChildrenFlat($locationID);
+  $validMove = true;
+  if ($_POST["parent_id"] == $locationID) {
+    $validMove = false;
+    echo "<div>Can't move location to itself!</div>";
+  }
+  if ($validMove) {
+    foreach ($locationChildren as $child) {
+      if ($child == $_POST["parent_id"]) {
+        $validMove = false;
+        echo "<div>Can't move location to its own child!</div>";
+      }
+    }
+  }
+  if ($validMove) {
+    $updated = query("UPDATE im_location SET
+                        name=".escape($_POST["name"]).",
+                        description=".escape($_POST["description"]).",
+                        parent_location_id=".escape($_POST["parent_id"])."
+                      WHERE id=".escape($_POST["id"]).$queryRightCheck);
+    if ($updated && $oldParentLocation != $_POST["parent_id"])
+      locationMoved($locationID, $oldParentLocation, $_POST["parent_id"], $_POST["comment"], $locationChildren);
+  }
 }
 
 if (@$_POST["action"] == "add")
@@ -72,6 +89,15 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
         ?>
         </select>
     </tr>
+<?php
+    if ($formAction == "edit")
+      echo '
+        <tr>
+          <td>Move comment</td>
+          <td><input type="text" name="comment"/></td>
+        </tr>
+      ';
+?>
   </table>
   <input type="submit" value="<?= $formAction == "add" ? "Add location" : "Edit" ?>"/>
 </form>

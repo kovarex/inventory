@@ -49,7 +49,7 @@ function buildLocationStructure($flatLocationData)
   foreach($flatLocationData as $row)
   {
     $parent = &$structuredData;
-    for ($i = 1; $i <= 3; $i++)
+    for ($i = 1; $i <= LOCATION_CHILDREN_DEPTH; $i++)
     {
       $locationID = $row["level{$i}_location_id"];
       if (!empty($locationID))
@@ -62,7 +62,7 @@ function buildLocationStructure($flatLocationData)
   }
 }
 
-$flatLocationData = locationChildren($id);
+$flatLocationData = locationChildren($db->real_escape_string($_GET["id"]));
 
 buildLocationStructure($flatLocationData);
 foreach($locationPointers as $key=>$row)
