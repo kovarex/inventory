@@ -10,6 +10,7 @@ $result = query("SELECT
                    im_item.id,
                    im_item.name,
                    im_item.description,
+                   parent_location.id as location_id,
                    parent_location.name as location_name,
                    im_category.name as category_name,
                    length(im_item.image) as image_size
@@ -25,22 +26,16 @@ $item = $result->fetch_assoc();
 
 echo "<h1>Item: ".$item["name"]."</h1>";
 ?>
+<?= @$item['description'] ?>
+
  <table>
-    <tr>
-      <td>Name:</td>
-      <td><?= @$item['name'] ?></td>
-    </tr>
-    <tr>
-      <td>Description:</td>
-      <td><?= @$item['description'] ?></td>
-    </tr>
     <tr>
       <td>Category:</td>
       <td><?= @$item['category_name'] ?></td>
     </tr>
     <tr>
       <td>Location:</td>
-      <td><?= @$item['location_name'] ?></td>
+      <td><?= locationLink($item["location_id"], $item['location_name']) ?></td>
     </tr>
   </table>
 <?php
@@ -80,15 +75,18 @@ if (count($rows) != 0)
     {
       echo "<tr><td>";
       if (empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "Created in ".$row["to_location_name"];
+        echo "Created in ".locationLink($row["to_location_id"], $row["to_location_name"]);
       else if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "Moved from ".$row["from_location_name"]." to ".$row["to_location_name"];
+        echo "Moved from ".locationLink($row["from_location_id"], $row["from_location_name"]).
+             " to ".locationLink($row["to_location_id"], $row["to_location_name"]);
       else if (!empty($row["parent_from_location_id"]) and !empty($row["parent_to_location_id"]))
-        echo $row["parent_location_name"]." moved from ".$row["parent_from_location_name"]." to ".$row["parent_to_location_name"];
+        echo locationLink($row["parent_location_id"], $row["parent_location_name"])." moved from ".
+             locationLink($row["parent_from_location_id"], $row["parent_from_location_name"]).
+             " to ".locationLink($row["parent_to_location_id"], $row["parent_to_location_name"]);
       else
         echo "Unknown operation";
       echo "</td><td>".$row["comment"]."</td>";
-      echo "</td><td>".$row["user_name"]."</td>";
+      echo "<td>".$row["user_name"]."</td>";
       echo "</tr>";
     }
   ?>

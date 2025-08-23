@@ -17,5 +17,5 @@ assert(!empty($_SESSION["user"]));
 
 <?php
 if (@$hideIndexLink !== true)
-  echo "<div><a href='index.php'/>Home</a></div>";
+  echo "<div><a href=\"index.php\">Home</a></div>";
 ?>
