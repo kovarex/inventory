@@ -1,90 +1,53 @@
 <?php
 require("src/header.php");
-echo "<h1>Categories</h1>";
-$queryRightCheck = " and home_id=".homeID();
 
-if (@$_POST["action"] == "edit")
-  query("UPDATE im_category SET name='".
-        $db->real_escape_string($_POST["name"])."',
-        description='".
-        $db->real_escape_string($_POST["description"]).
-        "' WHERE id='".
-        $db->real_escape_string($_POST["id"])
-        ."'".$queryRightCheck);
+if (!isset($_GET["id"]))
+  die("ID of the object not provided");
 
-if (@$_POST["action"] == "add")
-  query("INSERT INTO im_category(name,description,home_id) value('".
-        $db->real_escape_string($_POST["name"])."','".
-        $db->real_escape_string($_POST["description"])."',".
-        homeID().")");
+$id = escape($_GET["id"]);
 
-if (@$_POST["action"] == "delete")
-  query("DELETE FROM im_category where id='".
-        $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+$category = query("SELECT
+                    im_category.id,
+                    im_category.name,
+                    im_category.description
+                  FROM im_category
+                    where im_category.id=$id")->fetch_assoc();
 
-$formAction = "add";
-if (@$_POST["action"] == "start-edit")
+if (empty($category))
+  die("Category not found!");
+
+$rows = query("SELECT
+                   im_item.id as item_id,
+                   im_item.name as item_name,
+                   im_item.description as item_description,
+                   parent_location.id as location_id,
+                   parent_location.name as location_name,
+                   im_category.id as category_id,
+                   im_category.name as category_name,
+                   length(im_item.image) as image_size
+                 FROM im_category, im_item
+                 left join im_location parent_location on im_item.location_id=parent_location.id
+                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().
+                 " and im_category.id=$id")->fetch_all(MYSQLI_ASSOC);
+
+echo "<h1>Category: ".$category["name"]."</h1>";
+echo $category['description'];
+
+if (count($rows) != 0)
 {
-  $result = query("SELECT * FROM im_category where id='".
-                  $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
-  $row = $result->fetch_assoc();
-  $formAction = "edit";
-}
-?>
-
-<form method="post">
-  <input type="hidden" name="action" value="<?= $formAction ?>"/>
-  <input type='hidden' name='id' value="<?= @$row['id'] ?>"/>
-  <table>
-    <tr>
-      <td><label for="name">Name:</label></td>
-      <td><input type="text" name="name" value="<?= @$row['name'] ?>"/></td>
-    </tr>
-    <tr>
-      <td><label for="description">Description:</label></td>
-      <td><input type="text" name="description" value="<?= @$row['description'] ?>"/></td>
-    </tr>
-  </table>
-  <input type="submit" value="<?= $formAction == "add" ? "Add category" : "Edit" ?>"/>
-</form>
-
-<?php
-
-
-$result = $db->query("SELECT * FROM im_category where im_category.home_id=".homeID());
-if ($result->num_rows != 0)
-{
-  echo "<table class='data-table'><tr><th>Name</th><th>Description</th></tr>";
-  while($row = $result->fetch_assoc())
+  echo "<table class=\"data-table\">";
+  echo "<tr><th>Name</th><th>Description</th><th>image</th></tr>";
+  foreach($rows as $row)
   {
-    echo <<<HTML
-    <tr>
-      <td>
-        {$row["name"]}
-      </td>
-      <td>
-        {$row["description"]}
-      </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Delete"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
-          <input type="hidden" name="action" value="delete">
-        </form>
-      </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
-          <input type="hidden" name="action" value="start-edit">
-        </form>
-      </td>
-    </tr>
-  HTML;
+    echo "<tr>";
+    echo "<td>".itemLink($row["item_id"], $row["item_name"])."</td>";
+    echo "<td>".locationLink($row["location_id"], $row["location_name"])."</td>";
+    echo "<td>".itemLink($row["item_id"], itemImage($row['item_id'], $row['image_size'] > 0))."</td>";
+    echo "</tr>";
   }
+  echo "</table>";
 }
 
-echo "</table>";
+require("src/footer.php"); ?>
 
-require("src/footer.php");
-?>
+

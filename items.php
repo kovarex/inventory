@@ -178,7 +178,6 @@ if (count($rows) != 0)
   echo "<table class='data-table'><tr><th>Name</th><th>Description</th><th>Category</th><th>Location</th></tr>";
   foreach($rows as $row)
   {
-    $image = ($row['image_size'] > 0) ? "<img src=\"image.php?source=item&id={$row['id']}&type=thumbnail\"/>" : "";
     echo '
     <tr>
       <td>'.itemLink($row["id"], $row["name"]).'</a>
@@ -186,7 +185,7 @@ if (count($rows) != 0)
       <td>'.$row["description"].'</td>
       <td>'.$row["category_name"].'</td>
       <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
-      <td>'.itemLink($row["id"], $image).'</td>
+      <td>'.itemLink($row["id"], itemImage($row['id'], $row['image_size'] > 0)).'</td>
       <td>
         <form method="post">
           <input type="submit" value="Delete"/>
