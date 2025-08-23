@@ -14,18 +14,18 @@ function categoryLink($categoryID, $categoryName)
   return "<a href=\"category.php?id=$categoryID\">$categoryName</a>";
 }
 
-function itemImage($id, $generate)
+function itemImage($id, $generate, $type = "thumbnail")
 {
   if (!$generate)
     return "";
-  return "<img src=\"image.php?source=item&id=".$id."&type=thumbnail\"/>";
+  return "<img src=\"image.php?source=item&id=".$id."&type=".$type."\"/>";
 }
 
-function locationImage($id, $generate)
+function locationImage($id, $generate, $type = "thumbnail")
 {
   if (!$generate)
     return "";
-  return "<img src=\"image.php?source=location&id=".$id."&type=thumbnail\"/>";
+  return "<img src=\"image.php?source=location&id=".$id."&type=".$type."\"/>";
 }
 
 ?>

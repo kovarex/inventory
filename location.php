@@ -10,7 +10,8 @@ $id = escape($_GET["id"]);
 $result = query("SELECT
                    im_location.id,
                    im_location.name,
-                   im_location.description
+                   im_location.description,
+                   length(im_location.image) > 0 as has_image
                  FROM im_location
                  WHERE
                    im_location.id=$id");
@@ -22,6 +23,7 @@ $item = $result->fetch_assoc();
 
 echo "<h1>Location: ".$item["name"]."</h1>";
 echo "<div>".$item["description"]."</div>";
+echo "<div>".locationImage($item["id"], $item["has_image"], "big")."</div>";
 
 itemForm("add", NULL, "location.php?id=".$_GET["id"], $_GET["id"]);
 

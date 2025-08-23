@@ -15,7 +15,7 @@ $result = query("SELECT
                    parent_location.name as location_name,
                    im_category.id as category_id,
                    im_category.name as category_name,
-                   length(im_item.image) as image_size
+                   length(im_item.image) > 0 as has_image
                  FROM im_category, im_item
                  left join im_location parent_location on im_item.location_id=parent_location.id
                  where im_item.category_id = im_category.id and im_item.home_id=".homeID().
@@ -63,9 +63,7 @@ function showEditDialog(event)
   </table>
 <?php
 
-if ($item['image_size'] > 0)
-  echo "<img src=\"image.php?source=item&id={$item['id']}\"/>";
-
+echo itemImage($item["id"], $item["has_image"], "big");
 
 $result = query("SELECT
                        im_transaction.*,
