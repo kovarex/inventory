@@ -1,65 +1,12 @@
 <?php
 require("src/header.php");
 require("src/transaction_log.php");
-require("src/image_upload_helper.php");
-require("src/add_item_helper.php");
+require("src/item_helper.php");
 require_once("constants.php");
 
 echo "<h1>Items</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
-function checkCategoryAndLocation()
-{
-  global $db;
-  if (query("SELECT im_location.id
-            from im_location
-            where
-              im_location.id=".escape($_POST["location_id"])." and
-              im_location.home_id=".homeID())->num_rows == 0)
-    return false;
-
-  if (query("SELECT im_category.id
-            from im_category
-            where
-              im_category.id=".escape($_POST["category_id"])." and
-              im_category.home_id=".homeID())->num_rows == 0)
-    return false;
-
-  return true;
-}
-
-$imageData = tryToProcessImageUpload();
-
-if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
-{
-  $beforeChange = query("SELECT * FROM im_item where im_item.id=".escape($_POST["id"]))->fetch_assoc();
-
-  query("UPDATE im_item SET ".
-        "  name=".escape($_POST["name"]).",".
-        "  description=".escape($_POST["description"]).",".
-        "  category_id=".escape($_POST["category_id"]).",".
-        "  location_id=".escape($_POST["location_id"]).
-        (isset($imageData) ? ",image=X".escape($imageData["big"]) : "").
-        (isset($imageData) ? ",thumbnail=X".escape($imageData["thumbnail"]) : "").
-        "WHERE id=".escape($_POST["id"]).$queryRightCheck);
-  if (!empty($beforeChange["location_id"]) and !empty($_POST["location_id"]) &&
-      $beforeChange["location_id"] != $_POST["location_id"])
-    itemMoved($_POST["id"], $beforeChange["location_id"], $_POST["location_id"], $_POST["comment"]);
-}
-
-if (@$_POST["action"] == "add" and checkCategoryAndLocation())
-{
-  query("INSERT INTO im_item(name,description,home_id,location_id,image, thumbnail, category_id)
-        value(".
-        escape($_POST["name"]).",".
-        escape($_POST["description"]).",".
-        homeID().",".
-        escape($_POST["location_id"]).",".
-        (isset($imageData) ?  "X".escape($imageData["big"]) : "NULL").",".
-        (isset($imageData) ?  "X".escape($imageData["thumbnail"]) : "NULL").",".
-        escape($_POST["category_id"]).")");
-  itemCreated($_POST["location_id"], $_POST["comment"]);
-}
 if (@$_POST["action"] == "delete")
   query("DELETE FROM im_item where id=".escape($_POST["id"]).$queryRightCheck);
 
@@ -71,7 +18,7 @@ if (@$_POST["action"] == "start-edit")
   $formAction = "edit";
 }
 
-itemForm($formAction, @$itemToEdit);
+itemForm($formAction, @$itemToEdit, "items.php");
 ?>
 
 <hr>
