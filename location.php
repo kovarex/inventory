@@ -1,5 +1,6 @@
 <?php
 require("src/header.php");
+require("src/item_helper.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
@@ -20,9 +21,9 @@ if ($result->num_rows == 0)
 $item = $result->fetch_assoc();
 
 echo "<h1>Location: ".$item["name"]."</h1>";
-?>
-<?= @$item['description'] ?>
-<?php
+echo "<div>".$item["description"]."</div>";
+
+itemForm("add", NULL, "location.php?id=".$_GET["id"], $_GET["id"]);
 
 $structuredData["name"] = $item["name"];
 $locationPointers[$item["id"]] = &$structuredData;

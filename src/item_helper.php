@@ -23,7 +23,7 @@ function checkCategoryAndLocation()
 function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NULL)
 {
 ?>
-  <form method="post" enctype="multipart/form-data" action="<?= $formAction == "add" ? "add_item.php" : "edit_item.php" ?>">
+  <form method="post" enctype="multipart/form-data" action="<?= $formAction == "add" ? "add_item.php" : "edit_item.php" ?>" class="data-form">
   <input type="hidden" name="action" value="<?= $formAction ?>"/>
   <input type='hidden' name='id' value="<?= @$itemToEdit['id'] ?>"/>
   <table>

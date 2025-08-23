@@ -1,4 +1,4 @@
 .data-table td{border:solid 1px;}
 .data-table {border-collapse:collapse;}
-
+.data-form {border: solid 1px;display:inline-block;}
 .search-form {display: inline;}
