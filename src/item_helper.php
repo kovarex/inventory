@@ -97,7 +97,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     </tr>
   </table>
   <input type="hidden" name="redirect" value="<?= $redirect ?>"/>
-  <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Edit" ?>"/>
+  <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Save" ?>"/>
 </form>
 <?php
 }

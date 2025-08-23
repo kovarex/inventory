@@ -77,13 +77,6 @@ if (count($rows) != 0)
           <input type="hidden" name="action" value="delete">
         </form>
       </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="'.$row["id"].'"/>
-          <input type="hidden" name="action" value="start-edit">
-        </form>
-      </td>
     </tr>';
   }
 }

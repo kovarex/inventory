@@ -1,5 +1,6 @@
 <?php
 require("src/header.php");
+require("src/item_helper.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
@@ -12,6 +13,7 @@ $result = query("SELECT
                    im_item.description,
                    parent_location.id as location_id,
                    parent_location.name as location_name,
+                   im_category.id as category_id,
                    im_category.name as category_name,
                    length(im_item.image) as image_size
                  FROM im_category, im_item
@@ -24,8 +26,31 @@ if ($result->num_rows == 0)
 
 $item = $result->fetch_assoc();
 
-echo "<h1>Item: ".$item["name"]."</h1>";
+echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;display:none;\">";
+itemForm("edit", $item, "item.php?id=".$_GET["id"]);
+echo "</div>";
+
+
+
+echo "<h1>Item: ".$item["name"]."<button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></h1>";
 ?>
+<script type="text/javascript">
+function showEditDialog(event)
+{
+  let element = document.getElementById('edit-dialog');
+  if (element.style.display == 'none')
+  {
+    element.style.display = 'block';
+    let button = event.target;
+    let buttonPosition = button.getBoundingClientRect();
+    element.style.left = buttonPosition.x + 'px';
+    element.style.top = (buttonPosition.y + button.clientHeight) + 'px';
+  }
+  else
+    element.style.display = 'none';
+}
+</script>
+
 <?= @$item['description'] ?>
 
  <table>
