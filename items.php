@@ -1,6 +1,7 @@
 <?php
 require("src/header.php");
 require("src/transaction_log.php");
+require("src/image_upload_helper.php");
 require_once("constants.php");
 
 echo "<h1>Items</h1>";
@@ -26,54 +27,7 @@ function checkCategoryAndLocation()
   return true;
 }
 
-if (@is_uploaded_file($_FILES["item_image"]["tmp_name"]))
-{
-  $imageFileName = $_FILES["item_image"]["tmp_name"];
-  $imageInfo = @getimagesize($imageFileName);
-  if ($imageInfo===false)
-  {
-    echo "<div>Unrecognized image file format!</div>";
-    goto ZaTo; // Jirka has learned something new
-  }
-
-  if ($imageInfo['mime']=='image/png')
-    $imageOriginal = imagecreatefrompng($imageFileName);
-  elseif (in_array($imageInfo['mime'],['image/jpg','image/jpeg','image/pjpeg']))
-    $imageOriginal = imagecreatefromjpeg($imageFileName);
-  else
-  {
-    echo "<div>Unsupported image file format!</div>";
-    goto ZaTo;
-  }
-
-  $aspect = $imageInfo['0'] / $imageInfo['1'];
-
-  if (!($imageInfo['0']<BIG_IMAGE_SIZE && $imageInfo['1']<BIG_IMAGE_SIZE)) {
-    $scaleBigWidth=($aspect>1)?BIG_IMAGE_SIZE:BIG_IMAGE_SIZE*$aspect;
-    $scaleBigHeight=($aspect>1)?BIG_IMAGE_SIZE/$aspect:BIG_IMAGE_SIZE;
-    $imageResizedBig = imagescale($imageOriginal, (int)$scaleBigWidth, (int)$scaleBigHeight, IMG_BICUBIC);
-
-    ob_start();
-    imagejpeg($imageResizedBig,NULL,80);
-    $imageResizedBigContents = ob_get_contents();
-    ob_end_clean();
-  } else {
-    $imageResizedBigContents = file_get_contents($imageFileName);
-  }
-
-  $scaleThumbnailWidth=($aspect>1)?THUMBNAIL_IMAGE_SIZE:THUMBNAIL_IMAGE_SIZE*$aspect;
-  $scaleThumbnailHeight=($aspect>1)?THUMBNAIL_IMAGE_SIZE/$aspect:THUMBNAIL_IMAGE_SIZE;
-  $imageResizedThumbnail = imagescale($imageOriginal, (int)$scaleThumbnailWidth, (int)$scaleThumbnailHeight, IMG_BICUBIC);
-
-  ob_start();
-  imagejpeg($imageResizedThumbnail,NULL,80);
-  $imageResizedThumbnailContents = ob_get_contents();
-  ob_end_clean();
-
-  $hexImageBig = bin2hex($imageResizedBigContents);
-  $hexImageThumbnail = bin2hex($imageResizedThumbnailContents);
-}
-ZaTo:
+$imageData = tryToProcessImageUpload();
 
 if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
 {
@@ -84,10 +38,11 @@ if (@$_POST["action"] == "edit" and checkCategoryAndLocation())
         "  description=".escape($_POST["description"]).",".
         "  category_id=".escape($_POST["category_id"]).",".
         "  location_id=".escape($_POST["location_id"]).
-        (isset($hexImageBig) ?  ",image=X".escape($hexImageBig) : "").
-        (isset($hexImageThumbnail) ?  ",thumbnail=X".escape($hexImageThumbnail) : "").
+        (isset($imageData) ? ",image=X".escape($imageData["big"]) : "").
+        (isset($imageData) ? ",thumbnail=X".escape($imageData["thumbnail"]) : "").
         "WHERE id=".escape($_POST["id"]).$queryRightCheck);
-  if (!empty($beforeChange["location_id"]) and !empty($_POST["location_id"]))
+  if (!empty($beforeChange["location_id"]) and !empty($_POST["location_id"]) &&
+      $beforeChange["location_id"] != $_POST["location_id"])
     itemMoved($_POST["id"], $beforeChange["location_id"], $_POST["location_id"], $_POST["comment"]);
 }
 
@@ -99,8 +54,8 @@ if (@$_POST["action"] == "add" and checkCategoryAndLocation())
         escape($_POST["description"]).",".
         homeID().",".
         escape($_POST["location_id"]).",".
-        (isset($hexImageBig) ?  "X".escape($hexImageBig) : "NULL").",".
-        (isset($hexImageThumbnail) ?  "X".escape($hexImageThumbnail) : "NULL").",".
+        (isset($imageData) ?  "X".escape($imageData["big"]) : "NULL").",".
+        (isset($imageData) ?  "X".escape($imageData["thumbnail"]) : "NULL").",".
         escape($_POST["category_id"]).")");
   itemCreated($_POST["location_id"], $_POST["comment"]);
 }
@@ -189,18 +144,21 @@ if (@$_POST["action"] == "start-edit")
   <input type=hidden name="action" value="search"/>
   <input type=submit value="Search"/>
 </form>
+
 <?php
-if (@$_GET['action']==="search") {
+if (@$_GET['action']==="search")
+{
   echo <<<HTML
-<form method=get class="search-form">
-  <input type=submit value="X"/>
-</form>
-HTML;
+  <form method=get class="search-form">
+    <input type=submit value="X"/>
+  </form>
+  HTML;
   $searchQuery=$db->real_escape_string($_GET['search']);
   $searchSQL=" AND (im_item.name LIKE '%{$searchQuery}%' OR im_item.description LIKE '%{$searchQuery}%')";
-} else {
-  $searchSQL="";
 }
+else
+  $searchSQL="";
+
 
 $result = query("SELECT
                    im_item.id,
@@ -228,7 +186,7 @@ if (count($rows) != 0)
       <td>'.$row["description"].'</td>
       <td>'.$row["category_name"].'</td>
       <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
-      <td>'.$image.'</td>
+      <td>'.itemLink($row["id"], $image).'</td>
       <td>
         <form method="post">
           <input type="submit" value="Delete"/>
