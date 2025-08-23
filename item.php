@@ -83,6 +83,8 @@ if (count($rows) != 0)
         echo "Created in ".$row["to_location_name"];
       else if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
         echo "Moved from ".$row["from_location_name"]." to ".$row["to_location_name"];
+      else if (!empty($row["parent_from_location_id"]) and !empty($row["parent_to_location_id"]))
+        echo $row["parent_location_name"]." moved from ".$row["parent_from_location_name"]." to ".$row["parent_to_location_name"];
       else
         echo "Unknown operation";
       echo "</td><td>".$row["comment"]."</td>";

@@ -37,4 +37,20 @@ function escape($input)
   global $db;
   return "'".$db->real_escape_string($input)."'";
 }
+
+function locationChildren($id) {
+  return query("SELECT
+                level1_location.id as level1_location_id,
+                level1_location.name as level1_location_name,
+                level2_location.id as level2_location_id,
+                level2_location.name as level2_location_name,
+                level3_location.id as level3_location_id,
+                level3_location.name as level3_location_name
+                FROM
+                  im_location as level1_location left join
+                  im_location as level2_location on level2_location.parent_location_id = level1_location.id left join
+                  im_location as level3_location on level3_location.parent_location_id = level2_location.id
+                WHERE
+                  level1_location.parent_location_id=$id")->fetch_all(MYSQLI_ASSOC);
+}
 ?>

@@ -1,14 +1,20 @@
 <?php
 require("src/header.php");
+require_once("src/transaction_log.php");
+
 echo "<h1>Locations</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
-if (@$_POST["action"] == "edit")
-  query("UPDATE im_location SET
-          name='".$db->real_escape_string($_POST["name"])."',
-          description='".$db->real_escape_string($_POST["description"])."',
-          parent_location_id='".$db->real_escape_string($_POST["parent_id"])."'
-        WHERE id='".$db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+if (@$_POST["action"] == "edit") {
+  $oldParentLocation=query("SELECT parent_location_id FROM im_location WHERE id=".escape($_POST["id"]))->fetch_assoc()["parent_location_id"];
+  $updated=query("UPDATE im_location SET
+                    name=".escape($_POST["name"]).",
+                    description=".escape($_POST["description"]).",
+                    parent_location_id=".escape($_POST["parent_id"])."
+                  WHERE id=".escape($_POST["id"]).$queryRightCheck);
+  if ($updated && $oldParentLocation != $_POST["parent_id"])
+    locationMoved($db->real_escape_string($_POST["id"]),$oldParentLocation,$db->real_escape_string($_POST["parent_id"]),"");
+}
 
 if (@$_POST["action"] == "add")
   query("INSERT INTO im_location(home_id, name,description,parent_location_id) value(".
