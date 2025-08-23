@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS `im_category` (
   `description` varchar(512) collate utf8_czech_ci default NULL,
   PRIMARY KEY  (`id`),
   KEY `home_id` (`home_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 
 CREATE TABLE IF NOT EXISTS `im_home` (
@@ -14,18 +14,17 @@ CREATE TABLE IF NOT EXISTS `im_home` (
   `description` varchar(512) collate utf8_czech_ci NOT NULL,
   `image` longblob,
   PRIMARY KEY  (`id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1
 
 
 CREATE TABLE IF NOT EXISTS `im_home_user` (
   `home_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
   KEY `home_id` (`home_id`,`user_id`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
 CREATE TABLE IF NOT EXISTS `im_item` (
   `id` int(11) NOT NULL auto_increment,
-  `deleted` tinyint(1) NOT NULL DEFAULT 0,
   `home_id` int(11) NOT NULL,
   `name` varchar(512) character set utf8 collate utf8_czech_ci NOT NULL,
   `description` varchar(1024) character set utf8 collate utf8_czech_ci default NULL,
@@ -37,7 +36,7 @@ CREATE TABLE IF NOT EXISTS `im_item` (
   KEY `location_id` (`location_id`,`category_id`),
   KEY `im_item_im_category_FK` (`category_id`),
   KEY `home_id` (`home_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `im_location` (
   `id` int(11) NOT NULL auto_increment,
@@ -50,7 +49,7 @@ CREATE TABLE IF NOT EXISTS `im_location` (
   PRIMARY KEY  (`id`),
   KEY `parent_location_id` (`parent_location_id`),
   KEY `home_id` (`home_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 
 CREATE TABLE IF NOT EXISTS `im_transaction` (
@@ -70,7 +69,7 @@ CREATE TABLE IF NOT EXISTS `im_transaction` (
   KEY `im_transcation_im_location_to_FK` (`to_location_id`),
   KEY `user_id` (`user_id`),
   KEY `parent_location_id` (`parent_location_id`,`parent_from_location_id`,`parent_to_location_id`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 CREATE TABLE IF NOT EXISTS `im_user` (
   `id` int(11) NOT NULL auto_increment,
@@ -80,6 +79,11 @@ CREATE TABLE IF NOT EXISTS `im_user` (
   PRIMARY KEY  (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
-ALTER TABLE im_item ADD FOREIGN KEY (location_id) REFERENCES im_location(id);
+ALTER TABLE im_item ADD FOREIGN KEY FK_item_location(location_id) REFERENCES im_location(id);
+ALTER TABLE im_item ADD FOREIGN KEY FK_item_home(home_id) REFERENCES im_home(id);
+ALTER TABLE im_item ADD FOREIGN KEY FK_item_category(category_id) REFERENCES im_category(id);
+ALTER TABLE im_location ADD FOREIGN KEY FK_location_location(parent_location_id) REFERENCES im_location(id);
+ALTER TABLE im_home_user ADD FOREIGN KEY FK_home_user_home(home_id) REFERENCES im_home(id);
+ALTER TABLE im_home_user ADD FOREIGN KEY FK_home_user_user(user_id) REFERENCES im_user(id);

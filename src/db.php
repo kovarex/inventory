@@ -35,6 +35,8 @@ function query($query, $show = false)
 
 function escape($input)
 {
+  if (empty($input))
+    return "NULL";
   global $db;
   return "'".$db->real_escape_string($input)."'";
 }
