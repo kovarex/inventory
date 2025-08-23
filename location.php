@@ -85,7 +85,7 @@ $flatData = query("SELECT
                 FROM
                   im_item, im_location
                 WHERE
-                  im_item.location_id in ($locationList)")->fetch_all(MYSQLI_ASSOC);
+                  im_item.location_id in ($locationList) AND im_item.deleted=false")->fetch_all(MYSQLI_ASSOC);
 addToStructuredData($flatData);
 
 if (count($structuredData) != 0)

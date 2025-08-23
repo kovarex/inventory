@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS `im_home_user` (
 
 CREATE TABLE IF NOT EXISTS `im_item` (
   `id` int(11) NOT NULL auto_increment,
+  `deleted` tinyint(1) NOT NULL DEFAULT 0,
   `home_id` int(11) NOT NULL,
   `name` varchar(512) character set utf8 collate utf8_czech_ci NOT NULL,
   `description` varchar(1024) character set utf8 collate utf8_czech_ci default NULL,

@@ -6,9 +6,16 @@ require_once("constants.php");
 
 echo "<h1>Items</h1>";
 $queryRightCheck = " and home_id=".homeID();
+$queryDeleted=" and deleted=false";
 
 if (@$_POST["action"] == "delete")
-  query("DELETE FROM im_item where id=".escape($_POST["id"]).$queryRightCheck);
+  query("UPDATE im_item SET deleted=true where id=".escape($_POST["id"]).$queryRightCheck);
+
+if (@$_POST["action"] == "restore")
+  query("UPDATE im_item SET deleted=false where id=".escape($_POST["id"]).$queryRightCheck);
+
+if (@$_GET["deleted"] == 'true')
+  $queryDeleted=" and deleted=true";
 
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
@@ -54,7 +61,7 @@ $result = query("SELECT
                    length(im_item.image) as image_size
                  FROM im_category, im_item
                  left join im_location parent_location on im_item.location_id=parent_location.id
-                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().$searchSQL);
+                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().$searchSQL.$queryDeleted);
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
@@ -72,9 +79,9 @@ if (count($rows) != 0)
       <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
       <td>
         <form method="post">
-          <input type="submit" value="Delete"/>
+          <input type="submit" value="'.(@$_GET["deleted"] == 'true' ? "Restore" : "Delete").'"/>
           <input type="hidden" name="id" value="'.$row["id"].'"/>
-          <input type="hidden" name="action" value="delete">
+          <input type="hidden" name="action" value="'.(@$_GET["deleted"] == 'true' ? "restore" : "delete").'">
         </form>
       </td>
     </tr>';
@@ -82,6 +89,11 @@ if (count($rows) != 0)
 }
 
 echo "</table>";
+
+if (@$_GET["deleted"] == 'true')
+  echo '<div><a href="items.php">Show existing items</a></div>';
+else
+  echo '<div><a href="items.php?deleted=true">Show deleted items</a></div>';
 
 require("src/footer.php");
 ?>
