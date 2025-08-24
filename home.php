@@ -3,8 +3,8 @@ $homeNotRequired = true;
 require_once("src/db.php");
 require_once("src/auth.php");
 
-$myHomesSelect = "SELECT * from im_home_user where im_home_user.home_id='".
-                    $db->real_escape_string(@$_POST["id"])."' and im_home_user.user_id=".userID();
+$myHomesSelect = "SELECT * from im_home_user where im_home_user.home_id=".
+                    escape(@$_POST["id"])." and im_home_user.user_id=".userID();
 $queryRightCheck = "and exists(".$myHomesSelect.")";
 if (@$_POST["action"] == "activate")
 {
@@ -19,18 +19,22 @@ function tryToInvite()
 {
   global $db;
   global $myHomesSelect;
-  $result = query("SELECT * FROM im_user where username='".$db->real_escape_string($_POST["username"])."'");
+  $result = query("SELECT * FROM im_user where username=".escape($_POST["username"]));
   if ($result->num_rows == 0)
     return "User to invite doesn't exist!";
-  if (query($myHomesSelect)->num_rows != 0)
+  if (query($myHomesSelect)->num_rows == 0)
     return "You have no access to this home!";
   query("INSERT INTO im_home_user(home_id, user_id)
-        values('{$db->real_escape_string($_POST["id"])}',
-               {$result->fetch_assoc()["id"]})");
+        values(".escape($_POST["id"]).",".
+               $result->fetch_assoc()["id"].")");
 }
 
 if (@$_POST["action"] == "invite")
-  tryToInvite();
+{
+  $result = tryToInvite();
+  if (!empty($result))
+    echo "<div>".$result."</div>";
+}
 
 if (@$_POST["action"] == "edit")
   query("UPDATE im_home SET name='".
