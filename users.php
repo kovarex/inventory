@@ -3,6 +3,7 @@ require("src/header.php");
 echo "<h1>Users</h1>";
 
 $users = query("SELECT
+                 im_user.id as id,
                  im_user.username as username,
                  count(t.transaction_id) as transaction_count
                FROM
@@ -25,7 +26,7 @@ $users = query("SELECT
 echo "<table class=\"data-table\"><tr><th>Username</th><th>Transactions</th></tr>";
 foreach($users as $user)
 {
-  echo "<tr><td>".$user["username"]."</td><td>".$user["transaction_count"]."</td></tr>";
+  echo "<tr><td>".userLink($user["id"], $user["username"])."</td><td>".$user["transaction_count"]."</td></tr>";
 }
 echo "</table>";
 ?>

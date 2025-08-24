@@ -14,6 +14,11 @@ function categoryLink($categoryID, $categoryName)
   return "<a href=\"category.php?id=$categoryID\">$categoryName</a>";
 }
 
+function userLink($id, $name)
+{
+  return "<a href=\"user.php?id=$id\">$name</a>";
+}
+
 function itemImage($id, $generate, $type = "thumbnail")
 {
   if (!$generate)

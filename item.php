@@ -48,20 +48,19 @@ function showEditDialog(event)
     element.style.display = 'none';
 }
 </script>
-
-<?= @$item['description'] ?>
-
+<?php
+echo $item['description'];
+echo '
  <table>
     <tr>
       <td>Category:</td>
-      <td><?= @$item['category_name'] ?></td>
+      <td>'.categoryLink($item["category_id"], $item['category_name']).'</td>
     </tr>
     <tr>
       <td>Location:</td>
-      <td><?= locationLink($item["location_id"], $item['location_name']) ?></td>
+      <td>'.locationLink($item["location_id"], $item['location_name']).'</td>
     </tr>
-  </table>
-<?php
+  </table>';
 
 echo itemImage($item["id"], $item["has_image"], "big");
 
@@ -72,6 +71,7 @@ $result = query("SELECT
                        parent_from_location.name as parent_from_location_name,
                        parent_to_location.name as parent_to_location_name,
                        parent_location.name as parent_location_name,
+                       im_user.id as user_id,
                        im_user.username as user_name
                        FROM im_transaction
                  LEFT JOIN im_location from_location ON from_location.id=im_transaction.from_location_id
@@ -108,7 +108,7 @@ if (count($rows) != 0)
       else
         echo "Unknown operation";
       echo "</td><td>".$row["comment"]."</td>";
-      echo "<td>".$row["user_name"]."</td>";
+      echo "<td>".userLink($row["user_id"], $row["user_name"])."</td>";
       echo "<td>".$row["timestamp"]."</td>";
       echo "</tr>";
     }
