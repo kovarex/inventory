@@ -8,6 +8,7 @@ require("src/header.php");
   <li><a href="home.php">Homes</a></li>
   <li><a href="categories.php">Categories</a></li>
   <li><a href="locations.php">Locations</a></li>
+  <li><a href="users.php">Users</a></li>
 </ul>
 <?php
 require("src/footer.php");
