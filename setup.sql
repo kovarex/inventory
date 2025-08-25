@@ -12,9 +12,8 @@ CREATE TABLE IF NOT EXISTS `im_home` (
   `id` int(11) NOT NULL auto_increment,
   `name` varchar(64) collate utf8_czech_ci NOT NULL,
   `description` varchar(512) collate utf8_czech_ci NOT NULL,
-  `image` longblob,
   PRIMARY KEY  (`id`)
-) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1
+) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
 
 CREATE TABLE IF NOT EXISTS `im_home_user` (
@@ -32,6 +31,7 @@ CREATE TABLE IF NOT EXISTS `im_item` (
   `thumbnail` longblob,
   `location_id` int(11) NOT NULL,
   `category_id` int(11) NOT NULL,
+  `deleted` bool default false,
   PRIMARY KEY  (`id`),
   KEY `location_id` (`location_id`,`category_id`),
   KEY `im_item_im_category_FK` (`category_id`),
@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS `im_location` (
   `name` varchar(512) collate utf8_czech_ci NOT NULL,
   `description` varchar(512) collate utf8_czech_ci default NULL,
   `image` longblob,
-  `thumbnail` longblob
+  `thumbnail` longblob,
   PRIMARY KEY  (`id`),
   KEY `parent_location_id` (`parent_location_id`),
   KEY `home_id` (`home_id`)
