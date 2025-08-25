@@ -16,4 +16,22 @@ function locationSelector($inputName, $preselectedID)
   }
   echo "</select>";
 }
+
+function buildLocationStructure($flatLocationData, &$structuredData, &$locationPointers)
+{
+  foreach($flatLocationData as $row)
+  {
+    $parent = &$structuredData;
+    for ($i = 1; $i <= LOCATION_CHILDREN_DEPTH; $i++)
+    {
+      $locationID = $row["level{$i}_location_id"];
+      if (!empty($locationID))
+      {
+        $parent["locations"][$locationID]["name"] = $row["level{$i}_location_name"];
+        $parent = &$parent["locations"][$locationID];
+        $locationPointers[$locationID] = &$parent;
+      }
+    }
+  }
+}
 ?>

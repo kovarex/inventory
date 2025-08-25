@@ -1,6 +1,7 @@
 <?php
 require("src/header.php");
 require("src/item_helper.php");
+require("src/location_helper.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
@@ -48,30 +49,7 @@ function addToStructuredData($flatData)
   }
 }
 
-function buildLocationStructure($flatLocationData)
-{
-  global $structuredData;
-  global $locationPointers;
-
-  foreach($flatLocationData as $row)
-  {
-    $parent = &$structuredData;
-    for ($i = 1; $i <= LOCATION_CHILDREN_DEPTH; $i++)
-    {
-      $locationID = $row["level{$i}_location_id"];
-      if (!empty($locationID))
-      {
-        $parent["locations"][$locationID]["name"] = $row["level{$i}_location_name"];
-        $parent = &$parent["locations"][$locationID];
-        $locationPointers[$locationID] = &$parent;
-      }
-    }
-  }
-}
-
-$flatLocationData = locationChildren(escape($_GET["id"]));
-
-buildLocationStructure($flatLocationData);
+buildLocationStructure(locationChildren(escape($_GET["id"])), $structuredData, $locationPointers);
 foreach($locationPointers as $key=>$row)
   if (empty($locationList))
     $locationList = $key;
