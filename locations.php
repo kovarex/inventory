@@ -14,7 +14,7 @@ if (@$_POST["action"] == "edit")
   $oldParentLocation=query("SELECT parent_location_id FROM im_location WHERE id=".escape($_POST["id"]))->fetch_assoc()["parent_location_id"];
   $locationChildren = locationChildrenFlat(escape($_POST["id"]));
   $validMove = true;
-  if ($_POST["parent_id"] == $locationID)
+  if ($_POST["parent_id"] == $_POST["id"])
   {
     $validMove = false;
     echo "<div>Can't move location to itself!</div>";
