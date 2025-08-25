@@ -41,22 +41,25 @@ function escape($input)
   return "'".$db->real_escape_string($input)."'";
 }
 
-function locationChildren($id) {
+function locationChildren($id)
+{
   $columns=[];
   $joins=["im_location as level1_location"];
-  for ($f=1;$f<=LOCATION_CHILDREN_DEPTH;$f++) {
-    $columns[]="level{$f}_location.id as level{$f}_location_id,
-                level{$f}_location.name as level{$f}_location_name";
-    if ($f>1) $joins[]="im_location as level{$f}_location on level{$f}_location.parent_location_id = level".($f-1)."_location.id";
+  for ($f = 1;$f <= LOCATION_CHILDREN_DEPTH; $f++)
+  {
+    $columns[] = "level{$f}_location.id as level{$f}_location_id,
+                  level{$f}_location.name as level{$f}_location_name";
+    if ($f > 1) $joins[] = "im_location as level{$f}_location on level{$f}_location.parent_location_id = level".($f - 1)."_location.id";
   }
   return query("SELECT 
                ".implode(",",$columns)." 
                FROM 
                ".implode(" left join ",$joins). " 
-               WHERE level1_location.parent_location_id='".$id."'")->fetch_all(MYSQLI_ASSOC);
+               WHERE level1_location.parent_location_id=".$id)->fetch_all(MYSQLI_ASSOC);
 }
 
-function locationChildrenFlat($id) {
+function locationChildrenFlat($id)
+{
   $children = locationChildren($id);
   $flatLocations=[$id];
   foreach($children as $row)
@@ -65,9 +68,7 @@ function locationChildrenFlat($id) {
     {
       $locationID = $row["level{$i}_location_id"];
       if (!empty($locationID))
-      {
         $flatLocations[] = $locationID;
-      }
     }
   }
   return $flatLocations;

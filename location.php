@@ -69,7 +69,7 @@ function buildLocationStructure($flatLocationData)
   }
 }
 
-$flatLocationData = locationChildren($db->real_escape_string($_GET["id"]));
+$flatLocationData = locationChildren(escape($_GET["id"]));
 
 buildLocationStructure($flatLocationData);
 foreach($locationPointers as $key=>$row)

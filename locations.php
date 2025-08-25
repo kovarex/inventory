@@ -9,24 +9,27 @@ $queryRightCheck = " and home_id=".homeID();
 
 $imageData = tryToProcessImageUpload();
 
-if (@$_POST["action"] == "edit") {
-  $locationID = $db->real_escape_string($_POST["id"]);
+if (@$_POST["action"] == "edit")
+{
   $oldParentLocation=query("SELECT parent_location_id FROM im_location WHERE id=".escape($_POST["id"]))->fetch_assoc()["parent_location_id"];
-  $locationChildren = locationChildrenFlat($locationID);
+  $locationChildren = locationChildrenFlat(escape($_POST["id"]));
   $validMove = true;
-  if ($_POST["parent_id"] == $locationID) {
+  if ($_POST["parent_id"] == $locationID)
+  {
     $validMove = false;
     echo "<div>Can't move location to itself!</div>";
   }
-  if ($validMove) {
-    foreach ($locationChildren as $child) {
-      if ($child == $_POST["parent_id"]) {
+  if ($validMove)
+  {
+    foreach ($locationChildren as $child)
+      if ($child == $_POST["parent_id"])
+      {
         $validMove = false;
         echo "<div>Can't move location to its own child!</div>";
       }
-    }
   }
-  if ($validMove) {
+  if ($validMove)
+  {
     $updated = query("UPDATE im_location SET
                         name=".escape($_POST["name"]).",
                         description=".escape($_POST["description"]).",
@@ -35,7 +38,7 @@ if (@$_POST["action"] == "edit") {
                         (isset($imageData) ? ",thumbnail=X".escape($imageData["thumbnail"]) : "").
                      " WHERE id=".escape($_POST["id"]).$queryRightCheck);
     if ($updated && $oldParentLocation != $_POST["parent_id"])
-      locationMoved($locationID, $oldParentLocation, $_POST["parent_id"], $_POST["comment"], $locationChildren);
+      locationMoved($_POST["id"], $oldParentLocation, $_POST["parent_id"], $_POST["comment"], $locationChildren);
   }
 }
 
