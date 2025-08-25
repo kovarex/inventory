@@ -1,6 +1,7 @@
 <?php
 require("src/header.php");
 require("src/image_upload_helper.php");
+require("src/location_helper.php");
 require_once("src/transaction_log.php");
 
 echo "<h1>Locations</h1>";
@@ -68,9 +69,9 @@ $result = $db->query("SELECT
                         parent_location.name as parent_name,
                         parent_location.id as parent_id,
                         length(im_location.image) > 0 as has_image
-                      FROM im_location ".
-                     "left join im_location parent_location on im_location.parent_location_id=parent_location.id ".
-                     "where im_location.home_id=".homeID());
+                      FROM im_location
+                        LEFT JOIN im_location parent_location on im_location.parent_location_id=parent_location.id
+                      WHERE im_location.home_id=".homeID());
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 ?>
@@ -93,17 +94,7 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
     </tr>
     <tr>
       <td><label for="parent_id">Parent:<label</td>
-      <td>
-        <select name="parent_id">
-          <option value="">None</option>
-        <?php
-          foreach($rows as $row)
-          {
-            $selected = $row["id"] == $locationToEdit["parent_location_id"] ? " selected" : "";
-            echo "<option value='{$row["id"]}'{$selected}>{$row["name"]}</option>";
-          }
-        ?>
-        </select>
+      <td><?php locationSelector("parent_id", @$locationToEdit["parent_location_id"]); ?></td>
     </tr>
 <?php
     if ($formAction == "edit")
@@ -111,8 +102,7 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
         <tr>
           <td>Move comment</td>
           <td><input type="text" name="comment"/></td>
-        </tr>
-      ';
+        </tr>';
 ?>
   </table>
   <input type="submit" value="<?= $formAction == "add" ? "Add location" : "Edit" ?>"/>

@@ -2,23 +2,26 @@
 function checkCategoryAndLocation()
 {
   global $db;
-  if (query("SELECT im_location.id
-            from im_location
-            where
-              im_location.id=".escape($_POST["location_id"])." and
-              im_location.home_id=".homeID())->num_rows == 0)
+  if (query("SELECT
+               im_location.id
+             FROM
+               im_location
+             WHERE
+               im_location.id=".escape($_POST["location_id"])." and
+               im_location.home_id=".homeID())->num_rows == 0)
     return false;
 
-  if (query("SELECT im_category.id
-            from im_category
-            where
+  if (query("SELECT
+              im_category.id
+            FROM
+              im_category
+            WHERE
               im_category.id=".escape($_POST["category_id"])." and
               im_category.home_id=".homeID())->num_rows == 0)
     return false;
 
   return true;
 }
-
 
 function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NULL)
 {
@@ -44,8 +47,10 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
           $result = query("SELECT
                              im_category.id,
                              im_category.name
-                           FROM im_category
-                           where im_category.home_id=".homeID());
+                           FROM
+                             im_category
+                           WHERE
+                             im_category.home_id=".homeID());
           $rows = $result->fetch_all(MYSQLI_ASSOC);
 
           foreach($rows as $row)
@@ -62,26 +67,8 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     ?>
     <tr>
       <td><label for="location_id">Location:</label></td>
-      <td>
-        <select name="location_id">
-        <?php
-
-          $result = query("SELECT
-                             im_location.id,
-                             im_location.name
-                           FROM im_location
-                           where im_location.home_id=".homeID());
-          $rows = $result->fetch_all(MYSQLI_ASSOC);
-
-          foreach($rows as $row)
-          {
-            $selected = $row["id"] == @$itemToEdit["location_id"] ? " selected" : "";
-            echo "<option value='{$row["id"]}'{$selected}>{$row["name"]}</option>";
-          }
-        ?>
-        </select>
-      </td>
-    </tr> <?php
+      <td><?php locationSelector("location_id", @$itemToEdit["location_id"]); ?></td>
+    </tr><?php
     }
     else
       echo "<input type=\"hidden\" name=\"location_id\" value=\"".$predefinedLocation."\"/>";
@@ -100,6 +87,4 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
 </form>
 <?php
 }
-
-
 ?>
