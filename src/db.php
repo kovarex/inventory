@@ -55,7 +55,7 @@ function locationChildren($id)
                ".implode(",",$columns)." 
                FROM 
                ".implode(" left join ",$joins). " 
-               WHERE level1_location.parent_location_id=".$id)->fetch_all(MYSQLI_ASSOC);
+               WHERE level1_location.parent_location_id".($id == "NULL" ? " is " : "=").$id)->fetch_all(MYSQLI_ASSOC);
 }
 
 function locationChildrenFlat($id)

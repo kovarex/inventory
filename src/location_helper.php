@@ -2,18 +2,21 @@
 function locationSelector($inputName, $preselectedID)
 {
   echo "<select name=\"".$inputName."\">";
-  $rows = query("SELECT
-                   im_location.id,
-                   im_location.name
-                 FROM im_location
-                 WHERE im_location.home_id=".homeID())->fetch_all(MYSQLI_ASSOC);
-  foreach($rows as $row)
+  buildLocationStructure(locationChildren('NULL'), $structuredData, $locationPointers);
+  function showSelect($parentID, $structuredData, $indent, $preselectedID)
   {
-    echo "<option value=".$row["id"];
-    if ($row["id"] == @$preselectedID)
-      echo " selected";
-    echo ">".$row["name"]."</option>";
+    if (!empty($parentID))
+    {
+      echo "<option value=".$parentID;
+      if ($parentID == @$preselectedID)
+        echo " selected";
+      echo ">".$indent.$structuredData["name"]."</option>";
+    }
+    if (!empty($structuredData["locations"]))
+      foreach($structuredData["locations"] as $key=>$row)
+        showSelect($key, $row, empty($parentID) ? $indent : $indent."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $preselectedID);
   }
+  showSelect(NULL, $structuredData, "", $preselectedID);
   echo "</select>";
 }
 
