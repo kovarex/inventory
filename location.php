@@ -11,6 +11,8 @@ $result = query("SELECT
                    im_location.id,
                    im_location.name,
                    im_location.description,
+                   im_location.parent_location_id,
+                   (SELECT parent_location.name FROM im_location AS parent_location WHERE im_location.parent_location_id=parent_location.id) AS parent_location_name,
                    length(im_location.image) > 0 as has_image
                  FROM im_location
                  WHERE
@@ -19,16 +21,16 @@ $result = query("SELECT
 if ($result->num_rows == 0)
   die("Location not found!");
 
-$item = $result->fetch_assoc();
+$location = $result->fetch_assoc();
 
-echo "<h1>Location: ".$item["name"]."</h1>";
-echo "<div>".$item["description"]."</div>";
-echo "<div>".locationImage($item["id"], $item["has_image"], "big")."</div>";
+echo "<h1>Location: ".$location["name"]."</h1>";
+echo "<div>".$location["description"]."</div>";
+echo "<div>".locationImage($location["id"], $location["has_image"], "big")."</div>";
 
 itemForm("add", NULL, "location.php?id=".$_GET["id"], $_GET["id"]);
 
-$structuredData["name"] = $item["name"];
-$locationPointers[$item["id"]] = &$structuredData;
+$structuredData["name"] = $location["name"];
+$locationPointers[$location["id"]] = &$structuredData;
 
 function addToStructuredData($flatData)
 {
@@ -94,7 +96,6 @@ if (count($structuredData) != 0)
   {
     if (empty($structuredData))
       return;
-
     echo "<li>".locationLink($parentID, $structuredData["name"]);
     if (!empty($structuredData["items"]))
     {
@@ -113,8 +114,10 @@ if (count($structuredData) != 0)
     echo "</li>";
   }
 
+  echo "<div>".locationLink($location["parent_location_id"],$location["parent_location_name"])."\\</div>";
+
   echo "<ul>";
-  show($item["id"], $structuredData);
+  show($location["id"], $structuredData);
   echo "</ul>";
 }
 ?>
