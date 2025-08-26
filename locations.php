@@ -1,7 +1,7 @@
 <?php
 require("src/header.php");
-require("src/image_upload_helper.php");
-require("src/location_helper.php");
+require_once("src/image_upload_helper.php");
+require_once("src/location_helper.php");
 require_once("src/transaction_log.php");
 
 echo "<h1>Locations</h1>";

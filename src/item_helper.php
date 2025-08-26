@@ -1,4 +1,5 @@
 <?php
+require_once("src/location_helper.php");
 function checkCategoryAndLocation()
 {
   global $db;

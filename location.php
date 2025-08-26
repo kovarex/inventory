@@ -1,7 +1,7 @@
 <?php
 require("src/header.php");
-require("src/item_helper.php");
-require("src/location_helper.php");
+require_once("src/item_helper.php");
+require_once("src/location_helper.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");

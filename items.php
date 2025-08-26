@@ -1,8 +1,8 @@
 <?php
 require("src/header.php");
-require("src/transaction_log.php");
-require("src/item_helper.php");
-require("src/location_helper.php");
+require_once("src/transaction_log.php");
+require_once("src/item_helper.php");
+require_once("src/location_helper.php");
 require_once("constants.php");
 
 echo "<h1>Items</h1>";
