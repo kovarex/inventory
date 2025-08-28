@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS `im_home` (
 CREATE TABLE IF NOT EXISTS `im_home_user` (
   `home_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
+  `last_home_id` int(11) default NULL,
   KEY `home_id` (`home_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 

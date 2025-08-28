@@ -9,7 +9,10 @@ $queryRightCheck = "and exists(".$myHomesSelect.")";
 if (@$_POST["action"] == "activate")
 {
   if (query($myHomesSelect)->num_rows != 0)
-    $_SESSION["home"] = query("SELECT * from im_home where id='".$db->real_escape_string($_POST["id"])."'")->fetch_assoc();
+  {
+    $_SESSION["home"] = query("SELECT * from im_home where id=".escape($_POST["id"]))->fetch_assoc();
+    query("UPDATE im_user SET last_home_id = ".escape($_POST["id"])." WHERE im_user.id=".userID());
+  }
 }
 
 require("src/header.php");
