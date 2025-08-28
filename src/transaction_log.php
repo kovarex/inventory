@@ -32,4 +32,20 @@ function locationMoved($id, $fromLocationID, $toLocationID, $comment, $childrenF
          im_item.id IN ($itemsList)");
 }
 
+function generateTransactionDescription($row, $context = "none")
+{
+   $itemContext = $context == "item" ? "" : " ".itemLink($row["item_id"], $row["item_name"]);
+   if (empty($row["from_location_id"]) and !empty($row["to_location_id"]))
+     return "Created".$itemContext." in ".locationLink($row["to_location_id"], $row["to_location_name"]);
+   if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
+     return "Moved ".$itemContext."from ".locationLink($row["from_location_id"], $row["from_location_name"]).
+          " to ".locationLink($row["to_location_id"], $row["to_location_name"]);
+   if (!empty($row["parent_from_location_id"]) and !empty($row["parent_to_location_id"]))
+     return ((context == "item") ? "" : $itemContext." indirectly moved because ").
+            locationLink($row["parent_location_id"], $row["parent_location_name"])." moved from ".
+            locationLink($row["parent_from_location_id"], $row["parent_from_location_name"]).
+            " to ".locationLink($row["parent_to_location_id"], $row["parent_to_location_name"]);
+   return "Unknown operation";
+}
+
 ?>

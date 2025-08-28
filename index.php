@@ -9,6 +9,7 @@ require("src/header.php");
   <li><a href="categories.php">Categories</a></li>
   <li><a href="locations.php">Locations</a></li>
   <li><a href="users.php">Users</a></li>
+  <li><a href="transactions.php">Transactions</a></li>
 </ul>
 <?php
 require("src/footer.php");

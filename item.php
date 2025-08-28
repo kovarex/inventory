@@ -67,26 +67,24 @@ echo "</table>";
 
 echo itemImage($item["id"], $item["has_image"], "big");
 
-$result = query("SELECT
-                       im_transaction.*,
-                       from_location.name as from_location_name,
-                       to_location.name as to_location_name,
-                       parent_from_location.name as parent_from_location_name,
-                       parent_to_location.name as parent_to_location_name,
-                       parent_location.name as parent_location_name,
-                       im_user.id as user_id,
-                       im_user.username as user_name
-                       FROM im_transaction
-                 LEFT JOIN im_location from_location ON from_location.id=im_transaction.from_location_id
-                 LEFT JOIN im_location to_location ON to_location.id=im_transaction.to_location_id
-                 LEFT JOIN im_location parent_from_location ON parent_from_location.id=im_transaction.parent_from_location_id
-                 LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
-                 LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
-                 LEFT JOIN im_user ON im_user.id=im_transaction.user_id
-                 WHERE item_id=$id
-                 ORDER BY im_transaction.timestamp");
-
-$rows = $result->fetch_all(MYSQLI_ASSOC);
+$rows = query("SELECT
+                     im_transaction.*,
+                     from_location.name as from_location_name,
+                     to_location.name as to_location_name,
+                     parent_from_location.name as parent_from_location_name,
+                     parent_to_location.name as parent_to_location_name,
+                     parent_location.name as parent_location_name,
+                     im_user.id as user_id,
+                     im_user.username as user_name
+                     FROM im_transaction
+               LEFT JOIN im_location from_location ON from_location.id=im_transaction.from_location_id
+               LEFT JOIN im_location to_location ON to_location.id=im_transaction.to_location_id
+               LEFT JOIN im_location parent_from_location ON parent_from_location.id=im_transaction.parent_from_location_id
+               LEFT JOIN im_location parent_to_location ON parent_to_location.id=im_transaction.parent_to_location_id
+               LEFT JOIN im_location parent_location ON parent_location.id=im_transaction.parent_location_id
+               LEFT JOIN im_user ON im_user.id=im_transaction.user_id
+               WHERE item_id=$id
+               ORDER BY im_transaction.timestamp")->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
 {
@@ -99,17 +97,7 @@ if (count($rows) != 0)
     foreach($rows as $row)
     {
       echo "<tr><td>";
-      if (empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "Created in ".locationLink($row["to_location_id"], $row["to_location_name"]);
-      else if (!empty($row["from_location_id"]) and !empty($row["to_location_id"]))
-        echo "Moved from ".locationLink($row["from_location_id"], $row["from_location_name"]).
-             " to ".locationLink($row["to_location_id"], $row["to_location_name"]);
-      else if (!empty($row["parent_from_location_id"]) and !empty($row["parent_to_location_id"]))
-        echo locationLink($row["parent_location_id"], $row["parent_location_name"])." moved from ".
-             locationLink($row["parent_from_location_id"], $row["parent_from_location_name"]).
-             " to ".locationLink($row["parent_to_location_id"], $row["parent_to_location_name"]);
-      else
-        echo "Unknown operation";
+      echo generateTransactionDescription($row, "item");
       echo "</td><td>".$row["comment"]."</td>";
       echo "<td>".userLink($row["user_id"], $row["user_name"])."</td>";
       echo "<td>".$row["timestamp"]."</td>";
