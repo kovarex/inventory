@@ -31,6 +31,7 @@ echo "<div>".locationImage($location["id"], $location["has_image"], "big")."</di
 itemForm("add", NULL, "location.php?id=".$_GET["id"], $_GET["id"]);
 
 $structuredData["name"] = $location["name"];
+$structuredData["id"] = $location["id"];
 $locationPointers[$location["id"]] = &$structuredData;
 
 function addToStructuredData($flatData)
@@ -43,7 +44,7 @@ function addToStructuredData($flatData)
     $root = &$locationPointers[$row["item_location_id"]];
     assert(!empty($root));
     $itemRef = &$root["items"][$row["item_id"]];
-	$itemRef["id"] = $row["item_id"];
+    $itemRef["id"] = $row["item_id"];
     $itemRef["name"] = $row["item_name"];
     $itemRef["description"] = $row["item_description"];
     $itemRef["has_image"] = $row["has_image"];
@@ -68,14 +69,15 @@ $flatData = query("SELECT
                 WHERE
                   im_item.location_id in ($locationList) AND im_item.deleted=false")->fetch_all(MYSQLI_ASSOC);
 addToStructuredData($flatData);
+sortLocationStructureRecursive($structuredData, $locationPointers);
 
 if (count($structuredData) != 0)
 {
-  function show($parentID, $structuredData)
+  function show($structuredData)
   {
     if (empty($structuredData))
       return;
-    echo "<li>".locationLink($parentID, $structuredData["name"]);
+    echo "<li>".locationLink($structuredData["id"], $structuredData["name"]);
     if (!empty($structuredData["items"]))
     {
       echo "<ul>";
@@ -86,8 +88,8 @@ if (count($structuredData) != 0)
     if (!empty($structuredData["locations"]))
     {
       echo "<ul>";
-      foreach($structuredData["locations"] as $key=>$row)
-        show($key, $row);
+      foreach($structuredData["locations"] as $row)
+        show($row);
       echo "</ul>";
     }
     echo "</li>";
@@ -96,7 +98,7 @@ if (count($structuredData) != 0)
   echo "<div>".locationLink($location["parent_location_id"],$location["parent_location_name"])."\\</div>";
 
   echo "<ul>";
-  show($location["id"], $structuredData);
+  show($structuredData);
   echo "</ul>";
 }
 ?>

@@ -32,6 +32,9 @@ function sortLocationStructureRecursive(&$structuredData, &$locationPointers)
       sortLocationStructureRecursive($innerLocation, $locationPointers);
     }
   }
+
+  if (!empty($structuredData["items"]))
+    usort($structuredData["items"], function ($item1, $item2) { return $item1['name'] <=> $item2['name']; });
 }
 
 function buildLocationStructureSorted($flatLocationData, &$structuredData, &$locationPointers)
