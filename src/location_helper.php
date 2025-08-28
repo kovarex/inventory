@@ -53,8 +53,12 @@ function buildLocationStructure($flatLocationData, &$structuredData, &$locationP
       $locationID = $row["level{$i}_location_id"];
       if (!empty($locationID))
       {
-        $parent["locations"][$locationID]["name"] = $row["level{$i}_location_name"];
         $parent["locations"][$locationID]["id"] = $locationID;
+        $parent["locations"][$locationID]["name"] = $row["level{$i}_location_name"];
+        $parent["locations"][$locationID]["description"] = $row["level{$i}_location_description"];
+        $parent["locations"][$locationID]["parent_location_id"] = $row["level{$i}_parent_location_id"];
+        $parent["locations"][$locationID]["parent_name"] = $row["level{$i}_parent_name"];
+        $parent["locations"][$locationID]["has_image"] = empty($row["level{$i}_has_image"]) ? false : true;
         $parent = &$parent["locations"][$locationID];
         $locationPointers[$locationID] = &$parent;
       }

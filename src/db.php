@@ -48,7 +48,11 @@ function locationChildren($id)
   for ($f = 1;$f <= LOCATION_CHILDREN_DEPTH; $f++)
   {
     $columns[] = "level{$f}_location.id as level{$f}_location_id,
-                  level{$f}_location.name as level{$f}_location_name";
+                  level{$f}_location.name as level{$f}_location_name,
+                  level{$f}_location.description as level{$f}_location_description,
+                  level{$f}_location.parent_location_id as level{$f}_parent_location_id,
+                  ".(($f > 1) ? "level".($f-1)."_location.name" : "NULL")." as level{$f}_parent_name,
+                  length(level{$f}_location.image) > 0 as level{$f}_has_image";
     if ($f > 1) $joins[] = "im_location as level{$f}_location on level{$f}_location.parent_location_id = level".($f - 1)."_location.id";
   }
   return query("SELECT 

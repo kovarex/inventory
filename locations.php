@@ -63,22 +63,6 @@ if (@$_POST["action"] == "start-edit")
 }
 ?>
 
-<?php
-
-$result = $db->query("SELECT
-                        im_location.id,
-                        im_location.name,
-                        im_location.description,
-                        parent_location.name as parent_name,
-                        parent_location.id as parent_id,
-                        length(im_location.image) > 0 as has_image
-                      FROM im_location
-                        LEFT JOIN im_location parent_location on im_location.parent_location_id=parent_location.id
-                      WHERE im_location.home_id=".homeID());
-$rows = $result->fetch_all(MYSQLI_ASSOC);
-
-?>
-
 <form method="post" enctype="multipart/form-data">
   <input type="hidden" name="action" value="<?= $formAction ?>"/>
   <input type='hidden' name='id' value="<?= @$locationToEdit['id'] ?>"/>
@@ -112,38 +96,42 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
 </form>
 
 <?php
-
-if (count($rows) != 0)
+buildLocationStructure(locationChildren('NULL'), $structuredData, $locationPointers);
+if (count($structuredData) != 0)
 {
   echo "<table class='data-table'><tr><th>Image</th><th>Name</th><th>Description</th><th>Parent</th</tr>";
-  foreach($rows as $row)
+  function showInTable($parentID, $structuredData, $indent)
   {
-    echo '
-    <tr>
-      <td>'.locationLink($row["id"], locationImage($row["id"], $row["has_image"])).'
-      <td>'.locationLink($row["id"], $row["name"]).'</a></td>
-      <td>'.$row["description"].'
-      </td>
-      <td>'.locationLink($row["parent_id"], $row["parent_name"]).'</td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Delete"/>
-          <input type="hidden" name="id" value="'.$row["id"].'"/>
-          <input type="hidden" name="action" value="delete">
-        </form>
-      </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="'.$row["id"].'"/>
-          <input type="hidden" name="action" value="start-edit">
-        </form>
-      </td>
-    </tr>';
+    if (!empty($parentID))
+    {
+      echo "<tr>";
+      echo "<td>".locationLink($structuredData["id"], locationImage($structuredData["id"], $structuredData["has_image"]));
+      echo "<td>".$indent.locationLink($structuredData["id"], $structuredData["name"])."</a></td>";
+      echo "<td>".$structuredData["description"]."</td>";
+      echo "<td>".locationLink($structuredData["parent_location_id"], $structuredData["parent_name"])."</td>";
+      echo "<td>
+              <form method=\"post\">
+                <input type=\"submit\" value=\"Delete\"/>
+                <input type=\"hidden\" name=\"id\" value=\"".$structuredData["id"]."\"/>
+                <input type=\"hidden\" name=\"action\" value=\"delete\">
+              </form>
+            </td>";
+     echo "<td>
+             <form method=\"post\">
+               <input type=\"submit\" value=\"Edit\"/>
+               <input type=\"hidden\" name=\"id\" value=\"".$structuredData["id"]."\"/>
+               <input type=\"hidden\" name=\"action\" value=\"start-edit\">
+             </form>
+           </td>";
+     echo "</tr>";
+    }
+    if (!empty($structuredData["locations"]))
+      foreach($structuredData["locations"] as $row)
+        showInTable($row["id"], $row, empty($parentID) ? $indent : $indent."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;");
   }
+  showInTable(NULL, $structuredData, "");
+  echo "</table>";
 }
-
-echo "</table>";
 
 require("src/footer.php");
 ?>
