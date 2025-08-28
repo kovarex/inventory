@@ -43,6 +43,7 @@ function addToStructuredData($flatData)
     $root = &$locationPointers[$row["item_location_id"]];
     assert(!empty($root));
     $itemRef = &$root["items"][$row["item_id"]];
+	$itemRef["id"] = $row["item_id"];
     $itemRef["name"] = $row["item_name"];
     $itemRef["description"] = $row["item_description"];
     $itemRef["has_image"] = $row["has_image"];
@@ -78,8 +79,8 @@ if (count($structuredData) != 0)
     if (!empty($structuredData["items"]))
     {
       echo "<ul>";
-      foreach($structuredData["items"] as $key=>$row)
-        echo "<li style=\" display: flex;flex-direction: row;align-items: center;\">".($row["has_image"] ? itemLink($key, itemImage($key, $row["name"])) : "").itemLink($key, $row["name"])."</li>";
+      foreach($structuredData["items"] as $row)
+        echo "<li style=\" display: flex;flex-direction: row;align-items: center;\">".($row["has_image"] ? itemLink($row["id"], itemImage($row["id"], $row["name"])) : "").itemLink($row["id"], $row["name"])."</li>";
       echo "</ul>";
     }
     if (!empty($structuredData["locations"]))
