@@ -15,6 +15,7 @@ $beforeChange = query("SELECT * FROM im_item where im_item.id=".escape($_POST["i
 query("UPDATE im_item SET ".
       "  name=".escape($_POST["name"]).",".
       "  description=".escape($_POST["description"]).",".
+      "  author=".escape($_POST["author"]).",".
       "  category_id=".escape($_POST["category_id"]).",".
       "  location_id=".escape($_POST["location_id"]).
       (isset($imageData) ? ",image=X".escape($imageData["big"]) : "").

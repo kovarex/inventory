@@ -9,10 +9,11 @@ if (!checkCategoryAndLocation())
   die("Attempt to use invalid location or category");
 
 $imageData = tryToProcessImageUpload();
-query("INSERT INTO im_item(name,description,home_id,location_id,image, thumbnail, category_id)
+query("INSERT INTO im_item(name, description, author, home_id, location_id, image, thumbnail, category_id)
       value(".
       escape($_POST["name"]).",".
       escape($_POST["description"]).",".
+      escape($_POST["author"]).",".
       homeID().",".
       escape($_POST["location_id"]).",".
       (isset($imageData) ?  "X".escape($imageData["big"]) : "NULL").",".

@@ -40,6 +40,10 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
       <td><input type="text" name="description" value="<?= @$itemToEdit['description'] ?>"/></td>
     </tr>
     <tr>
+      <td><label for="author">Author:</label></td>
+      <td><input type="text" name="author" value="<?= @$itemToEdit['author'] ?>"/></td>
+    </tr>
+    <tr>
       <td><label for="category_id">Category:</label></td>
       <td>
         <select name="category_id">
@@ -76,7 +80,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     ?>
     <tr>
       <td><label for="image">Image:</label></td>
-      <td><input type="file" name="image" accept="image/*" capture="camera"></td>
+      <td><input type="file" name="image" accept="image/*" capture="camera" style="width:90px;height:80px;"></td>
     </tr>
     <tr>
       <td><?= $formAction == "add" ? "Creation comment" : "Move comment" ?></td>
@@ -84,7 +88,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     </tr>
   </table>
   <input type="hidden" name="redirect" value="<?= $redirect ?>"/>
-  <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Save" ?>"/>
+  <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Save" ?>" style="width:90px;height:80px;"/>
 </form>
 <?php
 }

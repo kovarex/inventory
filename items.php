@@ -19,12 +19,6 @@ if (@$_GET["deleted"] == 'true')
   $queryDeleted=" and deleted=true";
 
 $formAction = "add";
-if (@$_POST["action"] == "start-edit")
-{
-  $result = query("SELECT * FROM im_item where id=".escape($_POST["id"]).$queryRightCheck);
-  $itemToEdit = $result->fetch_assoc();
-  $formAction = "edit";
-}
 
 itemForm($formAction, @$itemToEdit, "items.php");
 ?>
@@ -45,7 +39,7 @@ if (@$_GET['action']==="search")
   </form>
   HTML;
   $searchQuery=$db->real_escape_string($_GET['search']);
-  $searchSQL=" AND (im_item.name LIKE '%{$searchQuery}%' OR im_item.description LIKE '%{$searchQuery}%')";
+  $searchSQL=" AND (im_item.name LIKE '%{$searchQuery}%' OR im_item.description LIKE '%{$searchQuery}%' OR im_item.author LIKE '%{$searchQuery}%')";
 }
 else
   $searchSQL="";
@@ -55,6 +49,7 @@ $result = query("SELECT
                    im_item.id,
                    im_item.name,
                    im_item.description,
+                   im_item.author,
                    parent_location.id as parent_location_id,
                    parent_location.name as parent_location_name,
                    im_category.id as category_id,
@@ -67,7 +62,7 @@ $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
 {
-  echo "<table class='data-table'><tr><th>Image</th><th>Name</th><th>Description</th><th>Category</th><th>Location</th></tr>";
+  echo "<table class='data-table'><tr><th>Image</th><th>Name</th><th>Description</th><th>Author</th><th>Category</th><th>Location</th></tr>";
   foreach($rows as $row)
   {
     echo '
@@ -76,6 +71,7 @@ if (count($rows) != 0)
       <td>'.itemLink($row["id"], $row["name"]).'
       </td>
       <td>'.$row["description"].'</td>
+      <td>'.$row["author"].'</td>
       <td>'.categoryLink($row["category_id"], $row["category_name"]).'</td>
       <td>'.locationLink($row["parent_location_id"], $row["parent_location_name"]).'</td>
       <td>
@@ -98,4 +94,3 @@ else
 
 require("src/footer.php");
 ?>
-

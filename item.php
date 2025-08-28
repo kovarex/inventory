@@ -11,6 +11,7 @@ $result = query("SELECT
                    im_item.id,
                    im_item.name,
                    im_item.description,
+                   im_item.author,
                    parent_location.id as location_id,
                    parent_location.name as location_name,
                    im_category.id as category_id,
@@ -59,8 +60,10 @@ echo '
     <tr>
       <td>Location:</td>
       <td>'.locationLink($item["location_id"], $item['location_name']).'</td>
-    </tr>
-  </table>';
+    </tr>';
+if (!empty($item["author"]))
+  echo "<tr><td>Author:</td><td>".$item["author"]."</td></tr>";
+echo "</table>";
 
 echo itemImage($item["id"], $item["has_image"], "big");
 
@@ -117,5 +120,3 @@ if (count($rows) != 0)
 <?php
 }
 require("src/footer.php"); ?>
-
-
