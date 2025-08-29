@@ -51,7 +51,7 @@ if (@$_POST["action"] == "start-edit")
 <?php
 
 
-$result = $db->query("SELECT * FROM im_category where im_category.home_id=".homeID());
+$result = $db->query("SELECT * FROM im_category where im_category.home_id=".homeID()." ORDER BY im_category.name ASC");
 if ($result->num_rows != 0)
 {
   echo "<table class='data-table'><tr><th>Name</th><th>Description</th></tr>";

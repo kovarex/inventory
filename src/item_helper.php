@@ -55,7 +55,9 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
                            FROM
                              im_category
                            WHERE
-                             im_category.home_id=".homeID());
+                             im_category.home_id=".homeID().
+                         " ORDER BY
+                             im_category.name ASC");
           $rows = $result->fetch_all(MYSQLI_ASSOC);
 
           foreach($rows as $row)
