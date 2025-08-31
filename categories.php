@@ -19,8 +19,7 @@ if (@$_POST["action"] == "add")
         homeID().")");
 
 if (@$_POST["action"] == "delete")
-  query("DELETE FROM im_category where id='".
-        $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
+  query("DELETE FROM im_category where id=".escape($_POST["id"]).$queryRightCheck);
 
 $formAction = "add";
 if (@$_POST["action"] == "start-edit")
@@ -57,28 +56,26 @@ if ($result->num_rows != 0)
   echo "<table class='data-table'><tr><th>Name</th><th>Description</th></tr>";
   while($row = $result->fetch_assoc())
   {
-    echo '
-    <tr>
-      <td>'.categoryLink($row["id"], $row["name"]).'</td>
-      <td>'.$row["description"].'</td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Delete"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
-          <input type="hidden" name="action" value="delete">
-        </form>
-      </td>
-      <td>
-        <form method="post" >
-          <input type="submit" value="Edit"/>
-          <input type="hidden" name="id" value="{$row["id"]}"/>
-          <input type="hidden" name="action" value="start-edit">
-        </form>
-      </td>
-    </tr>';
+    echo "<tr>";
+    echo "<td>".categoryLink($row["id"], $row["name"])."</td>";
+    echo "<td>".$row["description"]."</td>";
+    echo "<td>
+            <form method=\"post\">
+              <input type=\"submit\" value=\"Delete\"/>
+              <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
+              <input type=\"hidden\" name=\"action\" value=\"delete\">
+            </form>
+          </td>";
+    echo "<td>
+            <form method=\"post\">
+              <input type=\"submit\" value=\"Edit\"/>
+              <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
+              <input type=\"hidden\" name=\"action\" value=\"start-edit\">
+            </form>
+          </td>";
+    echo "</tr>";
   }
 }
-
 echo "</table>";
 
 require("src/footer.php");
