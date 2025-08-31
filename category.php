@@ -27,8 +27,11 @@ $rows = query("SELECT
                    length(im_item.image) as image_size
                  FROM im_category, im_item
                  left join im_location parent_location on im_item.location_id=parent_location.id
-                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().
-                 " and im_category.id=$id")->fetch_all(MYSQLI_ASSOC);
+                 WHERE
+                   im_item.category_id = im_category.id and
+                   im_item.home_id=".homeID()." and
+                   im_item.deleted = false and
+                   im_category.id=$id")->fetch_all(MYSQLI_ASSOC);
 
 echo "<h1>Category: ".$category["name"]."</h1>";
 echo $category['description'];
