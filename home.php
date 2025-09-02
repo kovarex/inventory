@@ -10,7 +10,9 @@ if (@$_POST["action"] == "activate")
 {
   if (query($myHomesSelect)->num_rows != 0)
   {
+    $myHomesSelect = query("SELECT * from im_home_user WHERE im_home_user.home_id='".escape(@$_POST["id"])."' and im_home_user.user_id=".userID())->fetch_assoc();
     $_SESSION["home"] = query("SELECT * from im_home where id=".escape($_POST["id"]))->fetch_assoc();
+    $_SESSION["home"]["is_admin"] = $myHomesSelect["is_admin"];
     query("UPDATE im_user SET last_home_id = ".escape($_POST["id"])." WHERE im_user.id=".userID());
   }
 }

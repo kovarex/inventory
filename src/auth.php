@@ -13,7 +13,10 @@ if (@!$homeNotRequired and empty($_SESSION["home"]))
   {
     $myHomesSelect = query("SELECT * from im_home_user WHERE im_home_user.home_id=".$lastHomeID." and im_home_user.user_id=".userID());
     if ($myHomesSelect->num_rows != 0)
+    {
       $_SESSION["home"] = query("Select * from im_home WHERE im_home.id=".$lastHomeID)->fetch_assoc();
+      $_SESSION["home"]["is_admin"] = $myHomesSelect->fetch_assoc()["is_admin"];
+    }
   }
   else
   {

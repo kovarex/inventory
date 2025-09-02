@@ -89,3 +89,4 @@ ALTER TABLE im_item ADD FOREIGN KEY FK_item_category(category_id) REFERENCES im_
 ALTER TABLE im_location ADD FOREIGN KEY FK_location_location(parent_location_id) REFERENCES im_location(id);
 ALTER TABLE im_home_user ADD FOREIGN KEY FK_home_user_home(home_id) REFERENCES im_home(id);
 ALTER TABLE im_home_user ADD FOREIGN KEY FK_home_user_user(user_id) REFERENCES im_user(id);
+ALTER TABLE im_transaction ADD FOREIGN KEY FK_transaction_item(item_id) REFERENCES im_item(id) ON DELETE CASCADE;
