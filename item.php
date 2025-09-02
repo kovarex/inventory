@@ -1,6 +1,7 @@
 <?php
 require("src/header.php");
 require("src/item_helper.php");
+require("src/transaction_log.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
