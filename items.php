@@ -9,12 +9,6 @@ echo "<h1>Items</h1>";
 $queryRightCheck = " and home_id=".homeID();
 $queryDeleted=" and deleted=false";
 
-if (@$_POST["action"] == "delete")
-  query("UPDATE im_item SET deleted=true where id=".escape($_POST["id"]).$queryRightCheck);
-
-if (@$_POST["action"] == "restore")
-  query("UPDATE im_item SET deleted=false where id=".escape($_POST["id"]).$queryRightCheck);
-
 if (@$_GET["deleted"] == 'true')
   $queryDeleted=" and deleted=true";
 
@@ -85,10 +79,10 @@ if (count($rows) != 0)
     echo "<td>".categoryLink($row["category_id"], $row["category_name"])."</td>";
     echo "<td>".locationLink($row["parent_location_id"], $row["parent_location_name"])."</td>";
     echo "<td>
-            <form method=\"post\">
+            <form method=\"post\" action=\"".(@$_GET["deleted"] == "true" ? "restore_item.php" : "delete_item.php")."\">
               <input type=\"submit\" value=\"".(@$_GET["deleted"] == "true" ? "Restore" : "Delete")."\"/>
               <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
-              <input type=\"hidden\" name=\"action\" value=\"".(@$_GET["deleted"] == "true" ? "restore" : "delete")."\">
+              <input type=\"hidden\" name=\"redirect\" value=\"items.php".(@$_GET["deleted"] == "true" ? "?deleted=true" : "")."\"/>
             </form>
           </td>";
     echo "</tr>";
