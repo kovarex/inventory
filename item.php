@@ -13,6 +13,7 @@ $result = query("SELECT
                    im_item.name,
                    im_item.description,
                    im_item.author,
+                   im_item.deleted,
                    parent_location.id as location_id,
                    parent_location.name as location_name,
                    im_category.id as category_id,
@@ -32,7 +33,18 @@ echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;displa
 itemForm("edit", $item, "item.php?id=".$_GET["id"]);
 echo "</div>";
 
-echo "<h1>Item: ".$item["name"]."<button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></h1>";
+echo "<h1>".($item["deleted"] ? "(Deleted) " : "")."Item: ".$item["name"]."</h1>";
+
+echo "<div><button type=\"button\" onclick=\"showEditDialog(event);\" style=\"width:90px;height:80px;\">Edit</button>";
+
+echo "<div>
+        <form method=\"post\" action=\"".($item["deleted"] ? "restore_item.php" : "delete_item.php")."\">
+          <input type=\"hidden\" name=\"id\" value=\"".$item["id"]."\"/>
+          <input type=\"hidden\" name=\"redirect\" value=\"item.php?id=".$item["id"]."\"/>
+          <input type=\"text\" name=\"comment\"/>
+          <input type=\"submit\";\" style=\"width:90px;height:80px;\" value=\"".($item["deleted"] ? "Restore" : "Delete")."\"/>
+        </form>
+      </div>";
 echo $item['description'];
 echo '
  <table>
