@@ -80,6 +80,7 @@ if (count($rows) != 0)
     echo "<td>".locationLink($row["parent_location_id"], $row["parent_location_name"])."</td>";
     echo "<td>
             <form method=\"post\" action=\"".(@$_GET["deleted"] == "true" ? "restore_item.php" : "delete_item.php")."\">
+              <input type=\"text\" name=\"comment\"/>
               <input type=\"submit\" value=\"".(@$_GET["deleted"] == "true" ? "Restore" : "Delete")."\"/>
               <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
               <input type=\"hidden\" name=\"redirect\" value=\"items.php".(@$_GET["deleted"] == "true" ? "?deleted=true" : "")."\"/>

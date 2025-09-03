@@ -1,6 +1,18 @@
 <?php
 require_once("constants.php");
 
+function itemDeleted($itemID, $comment)
+{
+  query("INSERT INTO im_transaction (item_id, action_id, user_id, comment)
+        values(".escape($itemID).", ".ITEM_REMOVED_ACTION_ID.", ".userID().", ".escape($comment).")");
+}
+
+function itemRestored($itemID, $comment)
+{
+  query("INSERT INTO im_transaction (item_id, action_id, user_id, comment)
+        values(".escape($itemID).", ".ITEM_RESTORED_ACTION_ID.", ".userID().", ".escape($comment).")");
+}
+
 function itemCreated($locationID, $comment)
 {
   query("INSERT INTO im_transaction (item_id, to_location_id, user_id, comment)
@@ -45,6 +57,8 @@ function generateTransactionDescription($row, $context = "none")
             locationLink($row["parent_location_id"], $row["parent_location_name"])." moved from ".
             locationLink($row["parent_from_location_id"], $row["parent_from_location_name"]).
             " to ".locationLink($row["parent_to_location_id"], $row["parent_to_location_name"]);
+   if (!empty($row["action_name"]))
+     return $row["action_name"];
    return "Unknown operation";
 }
 

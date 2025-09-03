@@ -65,6 +65,7 @@ CREATE TABLE IF NOT EXISTS `im_transaction` (
   `user_id` int(11) default NULL,
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `comment` varchar(1024) collate utf8_czech_ci default NULL,
+  `action_id ` int(11) default NULL,
   PRIMARY KEY  (`id`),
   KEY `item_id` (`item_id`,`from_location_id`,`to_location_id`),
   KEY `im_transcation_im_location_from_FK` (`from_location_id`),
@@ -83,6 +84,15 @@ CREATE TABLE IF NOT EXISTS `im_user` (
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB  DEFAULT CHARSET=utf8 COLLATE=utf8_czech_ci AUTO_INCREMENT=1;
 
+CREATE TABLE IF NOT EXISTS `im_action` (
+  `id` int NOT NULL,
+  `name` varchar(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+INSERT INTO im_action(id, name) values(1, "Item deleted");
+INSERT INTO im_action(id, name) values(2, "Item restored");
+
 ALTER TABLE im_item ADD FOREIGN KEY FK_item_location(location_id) REFERENCES im_location(id);
 ALTER TABLE im_item ADD FOREIGN KEY FK_item_home(home_id) REFERENCES im_home(id);
 ALTER TABLE im_item ADD FOREIGN KEY FK_item_category(category_id) REFERENCES im_category(id);
@@ -90,3 +100,4 @@ ALTER TABLE im_location ADD FOREIGN KEY FK_location_location(parent_location_id)
 ALTER TABLE im_home_user ADD FOREIGN KEY FK_home_user_home(home_id) REFERENCES im_home(id);
 ALTER TABLE im_home_user ADD FOREIGN KEY FK_home_user_user(user_id) REFERENCES im_user(id);
 ALTER TABLE im_transaction ADD FOREIGN KEY FK_transaction_item(item_id) REFERENCES im_item(id) ON DELETE CASCADE;
+ALTER TABLE im_transaction ADD FOREIGN KEY FK_transaction_action(action_id) REFERENCES im_action(id);

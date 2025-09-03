@@ -112,6 +112,3 @@ if (count($structuredData) != 0)
 ?>
 
 <?php require("src/footer.php"); ?>
-
-
-

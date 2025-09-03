@@ -2,4 +2,6 @@
 define("BIG_IMAGE_SIZE", 500);
 define("THUMBNAIL_IMAGE_SIZE", 100);
 define("LOCATION_CHILDREN_DEPTH", 5);
+define("ITEM_REMOVED_ACTION_ID", 1);
+define("ITEM_RESTORED_ACTION_ID", 2);
 ?>
