@@ -69,9 +69,11 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     </tr>
 <?php
     if (empty($predefinedLocation))
+    {
       echo "<tr><td><label for=\"location_id\">Location:</label></td><td>";
       locationSelector("location_id", @$itemToEdit["location_id"]);
       echo "</td></tr>";
+    }
     ?>
     <tr>
       <td><label for="image">Image:</label></td>
