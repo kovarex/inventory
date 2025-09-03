@@ -1,4 +1,35 @@
 <?php
+
+function locationForm($formAction, $locationToEdit, $redirect, $predefinedLocation = NULL)
+{
+  echo "<form method=\"post\" enctype=\"multipart/form-data\" class=\"data-form\" action=\"".($formAction == "add" ? "add_location.php" : "edit_location.php")."\">";
+  echo "<input type=\"hidden\" name=\"id\" value=\"".@$locationToEdit["id"]."\">";
+  echo "<table>";
+  echo "<tr>
+          <td><label for=\"name\">Name:</label></td>
+          <td><input type=\"text\" name=\"name\" value=\"".@$locationToEdit["name"]."\"/></td>
+        </tr>";
+  echo "<tr>
+          <td><label for=\"description\">Description:</label></td>
+          <td><input type=\"text\" name=\"description\" value=\"".@$locationToEdit['description']."\"></td>
+        </tr>";
+  echo "<tr>
+          <td><label for=\"image\">Image:</label></td>
+          <td><input type=\"file\" name=\"image\" accept=\"image/*\" capture=\"camera\"></td>
+        </tr>";
+  echo "<tr>
+          <td><label for=\"parent_id\">Parent:</label></td>
+          <td>";
+  echo locationSelector("parent_id", @$locationToEdit["parent_location_id"]);
+  echo "</td></tr>";
+  if ($formAction == "edit")
+    echo "<tr><td>Move comment</td><td><input type=\"text\" name=\"comment\"/></td></tr>";
+  echo "</table>";
+  echo "<input type=\"hidden\" name=\"redirect\" value=\"".$redirect."\"/>";
+  echo "<input type=\"submit\" value=\"".($formAction == "add" ? "Add location" : "Save")."\"/>";
+  echo "</form>";
+}
+
 function locationSelector($inputName, $preselectedID)
 {
   buildLocationStructureSorted(locationChildren('NULL'), $structuredData, $locationPointers);

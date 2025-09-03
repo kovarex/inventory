@@ -26,9 +26,17 @@ $location = $result->fetch_assoc();
 
 echo "<h1>Location: ".$location["name"]."</h1>";
 echo "<div>".$location["description"]."</div>";
+echo "<div><button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></div>";
+
+echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;display:none;\">";
+locationForm("edit", $location, "location.php?id=".$_GET["id"]);
+echo "</div>";
+
 echo "<div>".locationImage($location["id"], $location["has_image"], "big")."</div>";
 
+echo "<br/><br/>";
 itemForm("add", NULL, "location.php?id=".$_GET["id"], $_GET["id"]);
+echo "<br/><br/>";
 
 $structuredData["name"] = $location["name"];
 $structuredData["id"] = $location["id"];
@@ -95,7 +103,7 @@ if (count($structuredData) != 0)
     echo "</li>";
   }
 
-  echo "<div>".locationLink($location["parent_location_id"],$location["parent_location_name"])."\\</div>";
+  echo "<div>".locationLink($location["parent_location_id"],$location["parent_location_name"])."</div>";
 
   echo "<ul>";
   show($structuredData);

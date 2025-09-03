@@ -28,7 +28,6 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
 {
 ?>
   <form method="post" enctype="multipart/form-data" action="<?= $formAction == "add" ? "add_item.php" : "edit_item.php" ?>" class="data-form">
-  <input type="hidden" name="action" value="<?= $formAction ?>"/>
   <input type='hidden' name='id' value="<?= @$itemToEdit['id'] ?>"/>
   <table>
     <tr>
@@ -70,15 +69,10 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     </tr>
 <?php
     if (empty($predefinedLocation))
-    {
-    ?>
-    <tr>
-      <td><label for="location_id">Location:</label></td>
-      <td><?php locationSelector("location_id", @$itemToEdit["location_id"]); ?></td>
-    </tr><?php
-    }
-    else
-      echo "<input type=\"hidden\" name=\"location_id\" value=\"".$predefinedLocation."\"/>";
+      echo "<tr>
+              <td><label for=\"location_id\">Location:</label></td>
+              <td>".locationSelector("location_id", @$itemToEdit["location_id"])."</td>
+            </tr>";
     ?>
     <tr>
       <td><label for="image">Image:</label></td>
@@ -89,6 +83,8 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
       <td><input type="text" name="comment"/></td>
     </tr>
   </table>
+  <?php if (!empty($predefinedLocation)) echo "<input type=\"hidden\" name=\"location_id\" value=\"".$predefinedLocation."\"/>"; ?>
+    
   <input type="hidden" name="redirect" value="<?= $redirect ?>"/>
   <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Save" ?>" style="width:90px;height:80px;"/>
 </form>

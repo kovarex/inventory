@@ -33,24 +33,6 @@ itemForm("edit", $item, "item.php?id=".$_GET["id"]);
 echo "</div>";
 
 echo "<h1>Item: ".$item["name"]."<button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></h1>";
-?>
-<script type="text/javascript">
-function showEditDialog(event)
-{
-  let element = document.getElementById('edit-dialog');
-  if (element.style.display == 'none')
-  {
-    element.style.display = 'block';
-    let button = event.target;
-    let buttonPosition = button.getBoundingClientRect();
-    element.style.left = buttonPosition.x + 'px';
-    element.style.top = (buttonPosition.y + button.clientHeight) + 'px';
-  }
-  else
-    element.style.display = 'none';
-}
-</script>
-<?php
 echo $item['description'];
 echo '
  <table>
