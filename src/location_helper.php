@@ -35,7 +35,7 @@ function locationSelector($inputName, $preselectedID)
   buildLocationStructureSorted(locationChildren('NULL'), $structuredData, $locationPointers);
   echo "<select name=\"".$inputName."\">";
 
-  function showSelect($parentID, $structuredData, $indent, $preselectedID)
+  function showLocationSelect($parentID, $structuredData, $indent, $preselectedID)
   {
     if (!empty($parentID))
     {
@@ -46,9 +46,9 @@ function locationSelector($inputName, $preselectedID)
     }
     if (!empty($structuredData["locations"]))
       foreach($structuredData["locations"] as $row)
-        showSelect($row["id"], $row, empty($parentID) ? $indent : $indent."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $preselectedID);
+        showLocationSelect($row["id"], $row, empty($parentID) ? $indent : $indent."&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;", $preselectedID);
   }
-  showSelect(NULL, $structuredData, "", $preselectedID);
+  showLocationSelect(NULL, $structuredData, "", $preselectedID);
   echo "</select>";
 }
 
