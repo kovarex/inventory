@@ -1,4 +1,6 @@
 <?php
+ini_set('session.gc_maxlifetime', 3600 * 24 * 7); // a week
+session_set_cookie_params(3600 * 24 * 7);
 session_start();
 if (empty($_SESSION["user"]))
 {

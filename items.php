@@ -50,8 +50,9 @@ $result = query("SELECT
                    im_category.name as category_name,
                    length(im_item.image) as image_size
                  FROM im_category, im_item
-                 left join im_location parent_location on im_item.location_id=parent_location.id
-                 where im_item.category_id = im_category.id and im_item.home_id=".homeID().$searchSQL.$queryDeleted);
+                 LEFT JOIN im_location parent_location on im_item.location_id=parent_location.id
+                 WHERE im_item.category_id = im_category.id and im_item.home_id=".homeID().$searchSQL.$queryDeleted."
+                 ORDER BY im_item.id DESC");
 $rows = $result->fetch_all(MYSQLI_ASSOC);
 
 if (count($rows) != 0)
