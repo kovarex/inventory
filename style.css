@@ -1,4 +1,28 @@
-.data-table td{border:solid 1px;}
+.data-table td{border:solid 1px;padding: 3px;}
 .data-table {border-collapse:collapse;}
+.centered-table {margin-left: auto; margin-right: auto;}
 .data-form {border: solid 1px;display:inline-block;}
 .search-form {display: inline;}
+.winner {color:green;}
+.loser {color:red;}
+.centered-div
+{
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  align-content: center;
+  justify-content: center;
+}
+.sorting-image {width:16px;height:16px;vertical-align:middle;}
+.report-loss-link {font-size:40px;}
+.message-div
+{
+  border:solid 2px;
+  max-width: fit-content;
+  margin-left: auto;
+  margin-right: auto;
+  align-content: center;
+  justify-content: center;
+}
+h1 { width:500px; margin: 0 auto; text-align: center;}
+h3 { margin: 0 auto; text-align: center;}

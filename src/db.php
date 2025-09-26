@@ -1,5 +1,5 @@
 <?php
-require("config.php");
+require_once("config.php");
 require_once("constants.php");
 
 $db = new mysqli($dbServer, $dbUser, $dbPassword, $dbName);
@@ -55,10 +55,10 @@ function locationChildren($id)
                   length(level{$f}_location.image) > 0 as level{$f}_has_image";
     if ($f > 1) $joins[] = "im_location as level{$f}_location on level{$f}_location.parent_location_id = level".($f - 1)."_location.id";
   }
-  return query("SELECT 
-               ".implode(",",$columns)." 
-               FROM 
-               ".implode(" left join ",$joins). " 
+  return query("SELECT
+               ".implode(",",$columns)."
+               FROM
+               ".implode(" left join ",$joins). "
                WHERE level1_location.parent_location_id".($id == "NULL" ? " is " : "=").$id)->fetch_all(MYSQLI_ASSOC);
 }
 
