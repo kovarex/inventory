@@ -1,4 +1,23 @@
 <?php
+
+function generateAddress($url, $get)
+{
+  if (empty($get))
+    return $url;
+  $parameters = "";
+  foreach($get as $key =>$value)
+  {
+    if (empty($key))
+      continue; // php are you drunk?
+    if (empty($parameters))
+      $parameters .= "?";
+    else
+      $parameters .= "&amp;";
+    $parameters .= urlencode($key)."=".urlencode($value);
+  }
+  return $url.$parameters;
+}
+
 function locationLink($locationID, $locationName)
 {
   return "<a href=\"location.php?id=$locationID\">$locationName</a>";

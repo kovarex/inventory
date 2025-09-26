@@ -3,6 +3,7 @@ require("src/header.php");
 require_once("src/transaction_log.php");
 require_once("src/item_helper.php");
 require_once("src/location_helper.php");
+require_once("src/table_viewer.php");
 require_once("constants.php");
 
 echo "<h1>Items</h1>";
@@ -38,65 +39,77 @@ if (@$_GET['action']==="search")
 else
   $searchSQL="";
 
-
-$result = query("SELECT
-                   im_item.id,
-                   im_item.name,
-                   im_item.description,
-                   im_item.author,
-                   parent_location.id as parent_location_id,
-                   parent_location.name as parent_location_name,
-                   im_category.id as category_id,
-                   im_category.name as category_name,
-                   length(im_item.image) as image_size
-                 FROM im_category, im_item
-                 LEFT JOIN im_location parent_location on im_item.location_id=parent_location.id
-                 WHERE im_item.category_id = im_category.id and im_item.home_id=".homeID().$searchSQL.$queryDeleted."
-                 ORDER BY im_item.id DESC");
-$rows = $result->fetch_all(MYSQLI_ASSOC);
-
-if (count($rows) != 0)
-{
-  echo "<table class='data-table'><tr>";
-  if (@$_GET["deleted"] and $_SESSION["home"]["is_admin"])
-    echo "<th>Annihilate</td>";
-  echo "<th>Image</th><th>Name</th><th>Description</th><th>Author</th><th>Category</th><th>Location</th></tr>";
-  foreach($rows as $row)
-  {
-    echo "<tr>";
-    if (@$_GET["deleted"] and $_SESSION["home"]["is_admin"])
-      echo "<td>
-              <form method=\"post\" action=\"annihilate_item.php\">
-                <input type=\"submit\" value=\"Annihilate\"/>
-                <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
-                <input type=\"hidden\" name=\"action\" value=\"annihilate\">
-                <input type=\"hidden\" name=\"redirect\" value=\"items.php?deleted=true\"/>
-              </form>
-            </td>";
-    echo "<td>".itemLink($row["id"], itemImage($row["id"], $row["image_size"] > 0))."</td>";
-    echo "<td>".itemLink($row["id"], $row["name"])."</td>";
-    echo "<td>".$row["description"]."</td>";
-    echo "<td>".$row["author"]."</td>";
-    echo "<td>".categoryLink($row["category_id"], $row["category_name"])."</td>";
-    echo "<td>".locationLink($row["parent_location_id"], $row["parent_location_name"])."</td>";
-    echo "<td>
-            <form method=\"post\" action=\"".(@$_GET["deleted"] == "true" ? "restore_item.php" : "delete_item.php")."\">
-              <input type=\"text\" name=\"comment\"/>
-              <input type=\"submit\" value=\"".(@$_GET["deleted"] == "true" ? "Restore" : "Delete")."\"/>
-              <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
-              <input type=\"hidden\" name=\"redirect\" value=\"items.php".(@$_GET["deleted"] == "true" ? "?deleted=true" : "")."\"/>
-            </form>
-          </td>";
-    echo "</tr>";
-  }
-}
-
-echo "</table>";
-
 if (@$_GET["deleted"] == 'true')
   echo '<div><a href="items.php">Show existing items</a></div>';
 else
   echo '<div><a href="items.php?deleted=true">Show deleted items</a></div>';
 
+$table = new TableViewer("im_category, im_item
+                            LEFT JOIN im_location ON im_item.location_id=im_location.id
+                          WHERE
+                            im_item.category_id = im_category.id and
+                            im_item.home_id=".homeID().$searchSQL.$queryDeleted,
+                         $_GET);
+
+if (@$_GET["deleted"] and $_SESSION["home"]["is_admin"])
+  $table->addColumn("anihilate",
+                    "Anihilate",
+                    array(),
+                    function($row)
+                    {
+                     echo "<form method=\"post\" action=\"annihilate_item.php\">
+                             <input type=\"submit\" value=\"Annihilate\"/>
+                             <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
+                             <input type=\"hidden\" name=\"action\" value=\"annihilate\">
+                             <input type=\"hidden\" name=\"redirect\" value=\"items.php?deleted=true\"/>
+                           </form>";
+                    });
+
+$table->setPrimarySort(new SortDefinition("id", false));
+
+$table->addColumn("has_image",
+                  "Image",
+                  array(array("length(im_item.image) > 0", "has_image")),
+                  function($row) { echo itemLink($row["id"], itemImage($row["id"], $row["has_image"])); });
+
+$table->addColumn("name",
+                  "Name",
+                  array(array("im_item.name", "name"),
+                        array("im_item.id", "id")),
+                  function($row) { echo itemLink($row["id"], $row["name"]); });
+
+$table->addColumn("description",
+                  "Description",
+                  array(array("im_item.description", "description")),
+                  function($row) { echo $row["description"]; });
+
+$table->addColumn("author",
+                  "Author",
+                  array(array("im_item.author", "author")),
+                  function($row) { echo $row["author"]; });
+
+$table->addColumn("category",
+                  "Category",
+                  array(array("im_category.name", "category_name"),
+                        array("im_item.category_id", "category_id")),
+                  function($row) { echo categoryLink($row["category_id"], $row["category_name"]); });
+
+$table->addColumn("location",
+                  "Location",
+                  array(array("im_location.name", "location_name"),
+                        array("im_item.location_id", "location_id")),
+                  function($row) { echo locationLink($row["location_id"], $row["location_name"]); });
+
+$table->addColumn("delete",
+                  "Delete",
+                  array(),
+                  function($row) { echo  "<form method=\"post\" action=\"".(@$_GET["deleted"] == "true" ? "restore_item.php" : "delete_item.php")."\">
+                                            <input type=\"text\" name=\"comment\"/>
+                                            <input type=\"submit\" value=\"".(@$_GET["deleted"] == "true" ? "Restore" : "Delete")."\"/>
+                                            <input type=\"hidden\" name=\"id\" value=\"".$row["id"]."\"/>
+                                            <input type=\"hidden\" name=\"redirect\" value=\"items.php".(@$_GET["deleted"] == "true" ? "?deleted=true" : "")."\"/>
+                                          </form>"; });
+
+$table->render();
 require("src/footer.php");
 ?>
