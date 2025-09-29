@@ -25,3 +25,5 @@ if (!empty($_SESSION["user"]))
 <form method="get" action="register">
   <input type="submit" value="Register"/>
 </form>
+
+<a href="reset_password">Reset password</a>

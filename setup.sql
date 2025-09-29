@@ -79,6 +79,8 @@ CREATE TABLE IF NOT EXISTS `im_user` (
   `username` varchar(64) collate utf8_czech_ci NOT NULL,
   `password` varchar(512) character set utf8 collate utf8_bin NOT NULL,
   `email` varchar(256) collate utf8_czech_ci NOT NULL,
+  `reset_password_secret` INT UNSIGNED NULL DEFAULT NULL,
+  `reset_password_timestamp` TIMESTAMP NULL DEFAULT NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)

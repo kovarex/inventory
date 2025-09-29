@@ -28,7 +28,9 @@ foreach (array("login_action",
                "delete_item",
                "edit_item",
                "edit_location",
-               "image") as $target)
+               "image",
+               "reset_password_action",
+               "reset_password_confirm_action") as $target)
   $pages[$target] = PAGE_WITHOUT_HEADER;
 
 foreach (array("login",
@@ -44,7 +46,9 @@ foreach (array("login",
                "restore_item",
                "transactions",
                "user",
-               "users") as $target)
+               "users",
+               "reset_password",
+               "reset_password_confirm") as $target)
   $pages[$target] = NORMAL_PAGE;
 
 if ($pagePath == "")
