@@ -1,9 +1,7 @@
 <?php
-require("src/auth.php");
-require("src/db.php");
-require("src/item_helper.php");
-require("src/image_upload_helper.php");
-require("src/transaction_log.php");
+require_once("src/item_helper.php");
+require_once("src/image_upload_helper.php");
+require_once("src/transaction_log.php");
 
 if (!checkCategoryAndLocation())
   die("Attempt to use invalid location or category");

@@ -1,8 +1,6 @@
 <?php
-require("src/auth.php");
-require("src/db.php");
-require("src/location_helper.php");
-require("src/image_upload_helper.php");
+require_once("src/location_helper.php");
+require_once("src/image_upload_helper.php");
 
 $queryRightCheck = " and home_id=".homeID();
 $imageData = tryToProcessImageUpload();

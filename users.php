@@ -1,5 +1,4 @@
 <?php
-require("src/header.php");
 echo "<h1>Users</h1>";
 
 $users = query("SELECT
@@ -25,8 +24,6 @@ $users = query("SELECT
                  im_user.id")->fetch_all(MYSQLI_ASSOC);
 echo "<table class=\"data-table\"><tr><th>Username</th><th>Transactions</th></tr>";
 foreach($users as $user)
-{
   echo "<tr><td>".userLink($user["id"], $user["username"])."</td><td>".$user["transaction_count"]."</td></tr>";
-}
 echo "</table>";
 ?>

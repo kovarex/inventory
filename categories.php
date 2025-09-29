@@ -1,5 +1,4 @@
 <?php
-require("src/header.php");
 echo "<h1>Categories</h1>";
 $queryRightCheck = " and home_id=".homeID();
 
@@ -77,6 +76,4 @@ if ($result->num_rows != 0)
   }
 }
 echo "</table>";
-
-require("src/footer.php");
 ?>

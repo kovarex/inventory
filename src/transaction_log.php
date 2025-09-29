@@ -1,6 +1,4 @@
 <?php
-require_once("constants.php");
-
 function itemDeleted($itemID, $comment)
 {
   query("INSERT INTO im_transaction (item_id, action_id, user_id, comment)
@@ -40,7 +38,7 @@ function locationMoved($id, $fromLocationID, $toLocationID, $comment, $childrenF
       $itemsList .= ',' . $item['id'];
   }
   query("INSERT INTO im_transaction (item_id, parent_location_id, parent_from_location_id, parent_to_location_id, user_id, comment)
-         SELECT im_item.id, ".escape($id).", ".escape($fromLocationID).", ".escape($toLocationID).", ".userID().", ".escape($comment)." FROM im_item WHERE 
+         SELECT im_item.id, ".escape($id).", ".escape($fromLocationID).", ".escape($toLocationID).", ".userID().", ".escape($comment)." FROM im_item WHERE
          im_item.id IN ($itemsList)");
 }
 
@@ -61,5 +59,4 @@ function generateTransactionDescription($row, $context = "none")
      return $row["action_name"];
    return "Unknown operation";
 }
-
 ?>

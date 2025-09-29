@@ -1,5 +1,5 @@
 <?php
-require_once("src/location_helper.php");
+require_once("location_helper.php");
 function checkCategoryAndLocation()
 {
   global $db;
@@ -27,7 +27,7 @@ function checkCategoryAndLocation()
 function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NULL)
 {
 ?>
-  <form method="post" enctype="multipart/form-data" action="<?= $formAction == "add" ? "add_item.php" : "edit_item.php" ?>" class="data-form">
+  <form method="post" enctype="multipart/form-data" action="<?= $formAction == "add" ? "add_item" : "edit_item" ?>" class="data-form">
   <input type='hidden' name='id' value="<?= @$itemToEdit['id'] ?>"/>
   <table>
     <tr>
@@ -85,7 +85,7 @@ function itemForm($formAction, $itemToEdit, $redirect, $predefinedLocation = NUL
     </tr>
   </table>
   <?php if (!empty($predefinedLocation)) echo "<input type=\"hidden\" name=\"location_id\" value=\"".$predefinedLocation."\"/>"; ?>
-    
+
   <input type="hidden" name="redirect" value="<?= $redirect ?>"/>
   <input type="submit" value="<?= $formAction == "add" ? "Add Item" : "Save" ?>" style="width:90px;height:80px;"/>
 </form>

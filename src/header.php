@@ -1,8 +1,6 @@
 <?php
-require_once("src/db.php");
-require_once("src/auth.php");
-require("src/link_helper.php");
-require("src/header_internal.php");
+require_once("link_helper.php");
+require_once("header_internal.php");
 
 assert(!empty($_SESSION["user"]));
 ?>
@@ -16,6 +14,15 @@ assert(!empty($_SESSION["user"]));
 </div>
 
 <?php
-if (@$hideIndexLink !== true)
-  echo "<div><a href=\"index.php\">Home</a></div>";
+echo "<div class=\"centered-div\">\n";
+echo "<div class=\"centered-div\">\n";
+echo "<a href=\"/\">Home</a>\n";
+echo "&nbsp;&nbsp;:&nbsp;&nbsp;<a href=\"/items\">Items</a>\n";
+echo "&nbsp;&nbsp;:&nbsp;&nbsp;<a href=\"/homes\">Homes</a>\n";
+echo "&nbsp;&nbsp;:&nbsp;&nbsp;<a href=\"/categories\">Categories</a>\n";
+echo "&nbsp;&nbsp;:&nbsp;&nbsp;<a href=\"/locations\">Locations</a>\n";
+echo "&nbsp;&nbsp;:&nbsp;&nbsp;<a href=\"/users\">Users</a>\n";
+echo "&nbsp;&nbsp;:&nbsp;&nbsp;<a href=\"/transactions\">Transactions</a>\n";
+echo "</div>";
+echo "<br/><br/>\n";
 ?>

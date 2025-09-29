@@ -1,6 +1,5 @@
 <?php
-require("config.php");
-require_once("constants.php");
+require_once("config.php");
 
 $db = new mysqli($dbServer, $dbUser, $dbPassword, $dbName);
 if ($db->connect_error)
@@ -22,59 +21,55 @@ function query($query, $show = false)
 {
   global $db;
   if ($show)
-    echo "Debug query: ".$query;
-  $result = $db->query($query);
-  if (!empty($db->error))
+    echo "Debug query: ".$query."<br/>\n";
+  try
   {
-    echo "<div>Sql error:".$db->error."</div>";
-    echo "<pre>Query:".$query."</pre>";
-    die();
+    $time_start = microtime(true);
+    $result = $db->query($query);
+    $time_end = microtime(true);
+    $execution_time = ($time_end - $time_start);
+    if (@$_SESSION["statistics"])
+      echo "Query:".$query."<br/>\nTook ".round($execution_time, 4)." seconds<br/>\n";
+
+    if (!empty($db->error))
+    {
+      echo "<div>Sql error:".$db->error."</div>\n";
+      echo "<pre>Query:".$query."</pre>\n";
+      die();
+    }
+    return $result;
   }
-  return $result;
+  catch (Exception $e)
+  {
+      echo "<div>Sql error:".$e->getMessage()."</div>\n";
+      echo "<pre>Query:".$query."</pre>\n";
+      die();
+  }
+}
+
+function beginTransaction()
+{
+  global $db;
+  $db->begin_transaction();
+}
+
+function commitTransaction()
+{
+  global $db;
+  $db->commit();
+}
+
+function lastInsertID()
+{
+  global $db;
+  return $db->insert_id;
 }
 
 function escape($input)
 {
-  if (empty($input))
+  if ($input == NULL)
     return "NULL";
   global $db;
   return "'".$db->real_escape_string($input)."'";
-}
-
-function locationChildren($id)
-{
-  $columns=[];
-  $joins=["im_location as level1_location"];
-  for ($f = 1;$f <= LOCATION_CHILDREN_DEPTH; $f++)
-  {
-    $columns[] = "level{$f}_location.id as level{$f}_location_id,
-                  level{$f}_location.name as level{$f}_location_name,
-                  level{$f}_location.description as level{$f}_location_description,
-                  level{$f}_location.parent_location_id as level{$f}_parent_location_id,
-                  ".(($f > 1) ? "level".($f-1)."_location.name" : "NULL")." as level{$f}_parent_name,
-                  length(level{$f}_location.image) > 0 as level{$f}_has_image";
-    if ($f > 1) $joins[] = "im_location as level{$f}_location on level{$f}_location.parent_location_id = level".($f - 1)."_location.id";
-  }
-  return query("SELECT 
-               ".implode(",",$columns)." 
-               FROM 
-               ".implode(" left join ",$joins). " 
-               WHERE level1_location.parent_location_id".($id == "NULL" ? " is " : "=").$id)->fetch_all(MYSQLI_ASSOC);
-}
-
-function locationChildrenFlat($id)
-{
-  $children = locationChildren($id);
-  $flatLocations=[$id];
-  foreach($children as $row)
-  {
-    for ($i = 1; $i <= LOCATION_CHILDREN_DEPTH; $i++)
-    {
-      $locationID = $row["level{$i}_location_id"];
-      if (!empty($locationID))
-        $flatLocations[] = $locationID;
-    }
-  }
-  return $flatLocations;
 }
 ?>

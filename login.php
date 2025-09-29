@@ -30,14 +30,12 @@ function checkLogout($action)
   }
 }
 
-require("src/db.php");
-session_start();
 checkLogout(@$_POST['action']);
 $loginResult = checkLogin(@$_POST['username'], @$_POST['password']);
 
 if ($loginResult === true)
 {
-  header("Location: index.php");
+  header("Location: /");
   die();
 }
 
@@ -73,12 +71,10 @@ else
     <input type="submit" value="Login"/>
   </form>
 
- <form method="get" action="register.php">
+ <form method="get" action="register">
     <input type="submit" value="Register"/>
  </form>
 
 <?php
 }
-
-require("src/footer.php")
 ?>

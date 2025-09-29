@@ -4,11 +4,16 @@ session_set_cookie_params(3600 * 24 * 7);
 session_start();
 if (empty($_SESSION["user"]))
 {
-  header("Location: login.php");
-  die();
+  if ($pagePath != "login")
+  {
+    header("Location: /login");
+    die();
+  }
+  else
+    return;
 }
 
-if (@!$homeNotRequired and empty($_SESSION["home"]))
+if (empty($_SESSION["home"]))
 {
   $lastHomeID = query("SELECT last_home_id FROM im_user WHERE im_user.id=".userID())->fetch_assoc()["last_home_id"];
   if (!empty($lastHomeID))
@@ -22,7 +27,7 @@ if (@!$homeNotRequired and empty($_SESSION["home"]))
   }
   else
   {
-    header("Location: home.php");
+    header("Location: /home");
     die();
   }
 }

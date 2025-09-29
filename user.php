@@ -1,6 +1,4 @@
 <?php
-require("src/header.php");
-
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
 
@@ -67,11 +65,5 @@ if (count($rows) != 0)
       echo "<td>".$row["timestamp"]."</td>";
       echo "</tr>";
     }
-  ?>
-  </table>
-<?php
-}
-require("src/footer.php"); ?>
-
-
-
+  echo "</table>";
+}?>

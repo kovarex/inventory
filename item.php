@@ -1,5 +1,4 @@
 <?php
-require("src/header.php");
 require("src/item_helper.php");
 require("src/transaction_log.php");
 
@@ -30,7 +29,7 @@ if ($result->num_rows == 0)
 $item = $result->fetch_assoc();
 
 echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;display:none;\">";
-itemForm("edit", $item, "item.php?id=".$_GET["id"]);
+itemForm("edit", $item, "item?id=".$_GET["id"]);
 echo "</div>";
 
 echo "<h1>".($item["deleted"] ? "(Deleted) " : "")."Item: ".$item["name"]."</h1>";
@@ -38,9 +37,9 @@ echo "<h1>".($item["deleted"] ? "(Deleted) " : "")."Item: ".$item["name"]."</h1>
 echo "<div><button type=\"button\" onclick=\"showEditDialog(event);\" style=\"width:90px;height:80px;\">Edit</button>";
 
 echo "<div>
-        <form method=\"post\" action=\"".($item["deleted"] ? "restore_item.php" : "delete_item.php")."\">
+        <form method=\"post\" action=\"".($item["deleted"] ? "restore_item" : "delete_item")."\">
           <input type=\"hidden\" name=\"id\" value=\"".$item["id"]."\"/>
-          <input type=\"hidden\" name=\"redirect\" value=\"item.php?id=".$item["id"]."\"/>
+          <input type=\"hidden\" name=\"redirect\" value=\"item?id=".$item["id"]."\"/>
           <input type=\"text\" name=\"comment\"/>
           <input type=\"submit\";\" style=\"width:90px;height:80px;\" value=\"".($item["deleted"] ? "Restore" : "Delete")."\"/>
         </form>
@@ -100,8 +99,6 @@ if (count($rows) != 0)
       echo "<td>".$row["timestamp"]."</td>";
       echo "</tr>";
     }
-  ?>
-  </table>
-<?php
+  echo "</table>";
 }
-require("src/footer.php"); ?>
+?>

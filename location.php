@@ -1,5 +1,4 @@
 <?php
-require("src/header.php");
 require_once("src/item_helper.php");
 require_once("src/location_helper.php");
 
@@ -29,13 +28,13 @@ echo "<div>".$location["description"]."</div>";
 echo "<div><button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></div>";
 
 echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;display:none;\">";
-locationForm("edit", $location, "location.php?id=".$_GET["id"]);
+locationForm("edit", $location, "location?id=".$_GET["id"]);
 echo "</div>";
 
 echo "<div>".locationImage($location["id"], $location["has_image"], "big")."</div>";
 
 echo "<br/><br/>";
-itemForm("add", NULL, "location.php?id=".$_GET["id"], $_GET["id"]);
+itemForm("add", NULL, "location?id=".$_GET["id"], $_GET["id"]);
 echo "<br/><br/>";
 
 $structuredData["name"] = $location["name"];
@@ -110,5 +109,3 @@ if (count($structuredData) != 0)
   echo "</ul>";
 }
 ?>
-
-<?php require("src/footer.php"); ?>

@@ -1,7 +1,4 @@
 <?php
-require("src/auth.php");
-require("src/db.php");
-
 if (!isset($_GET["source"]))
   die("Source of the image not provided");
 

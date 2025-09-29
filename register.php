@@ -1,5 +1,4 @@
 <?php
-require("src/db.php");
 session_start();
 
 function tryToRegister($username, $password, $email)
@@ -27,7 +26,7 @@ function tryToRegister($username, $password, $email)
 
   $_SESSION["user"] = query("SELECT * FROM im_user where username='{$db->real_escape_string($username)}'")->fetch_assoc();
   $_SESSION["home"] = NULL;
-  header("Location: index.php");
+  header("Location: /");
   return true;
 }
 
@@ -58,5 +57,3 @@ require("src/header_internal.php");
   </table>
   <input type="submit" value="Register"/>
 </form>
-
-<?php require("src/footer.php"); ?>

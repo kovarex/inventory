@@ -1,5 +1,4 @@
 <?php
-require("src/header.php");
 require_once("src/image_upload_helper.php");
 require_once("src/location_helper.php");
 require_once("src/transaction_log.php");
@@ -19,7 +18,7 @@ if (@$_POST["action"] == "add")
 if (@$_POST["action"] == "delete")
   query("DELETE FROM im_location where id='".
         $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
-locationForm("add", NULL, "locations.php");
+locationForm("add", NULL, "locations");
 buildLocationStructure(locationChildren('NULL'), $structuredData, $locationPointers);
 
 if (count($structuredData) != 0)
@@ -50,6 +49,4 @@ if (count($structuredData) != 0)
   showInTable(NULL, $structuredData, "");
   echo "</table>";
 }
-
-require("src/footer.php");
 ?>

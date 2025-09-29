@@ -1,6 +1,5 @@
 <?php
-require("src/header.php");
-require("src/transaction_log.php");
+require_once("src/transaction_log.php");
 echo "<h1>Transactions</h1>";
 
 $rows = query("SELECT
@@ -41,5 +40,4 @@ if (count($rows) != 0)
   }
   echo "</table>";
 }
-require("src/footer.php");
 ?>
