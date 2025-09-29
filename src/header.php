@@ -1,19 +1,18 @@
 <?php
-require_once("link_helper.php");
 require_once("header_internal.php");
 
-assert(!empty($_SESSION["user"]));
-?>
+echo "<div style=\"position: absolute;right: 0px;\">";
+if (@$_SESSION["user"])
+{
+  echo "Currently logged in as ".$_SESSION["user"]["username"]." in ".(empty($_SESSION["home"]) ? "no home" : $_SESSION["home"]["name"]);
+  echo "<form method=\"post\" action=\"logoff_action\" style=\"display:inline;\">";
+  echo "<input type=\"submit\" value=\"Logoff\"/>";
+  echo "</form>";
+}
+else
+  echo "Currently not logged in";
 
-<div style="position: absolute;right: 0px;">
-  Currently logged in as <?=$_SESSION["user"]["username"]?> in <?=empty($_SESSION["home"]) ? "no home" : $_SESSION["home"]["name"] ?>
-  <form method="post" action="login.php" style="display:inline;">
-    <input type="submit" value="Logoff"/>
-    <input type="hidden" name="action" value="logoff"/>
-  </form>
-</div>
-
-<?php
+echo "</div>";
 echo "<div class=\"centered-div\">\n";
 echo "<div class=\"centered-div\">\n";
 echo "<a href=\"/\">Home</a>\n";

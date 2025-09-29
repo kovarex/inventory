@@ -17,6 +17,31 @@ function generateAddress($url, $get)
   return $url.$parameters;
 }
 
+function redirectWithMessageCustom($redirect, $message)
+{
+  if (!isset($redirect))
+    die("Redirect address not provided.");
+  $parameterDelimiter = "?";
+  if (str_contains($redirect, "?"))
+    $parameterDelimiter = "&";
+  header("Location: ".$redirect.$parameterDelimiter."message=".urlencode($message));
+  die();
+}
+
+function redirectWithMessage($message)
+{
+  $redirect = @$_POST["redirect"];
+  if (!$redirect)
+    $redirect = @$_GET["redirect"];
+  redirectWithMessageCustom($redirect, $message);
+}
+
+function redirect($target)
+{
+  header("Location: ".$target);
+  die();
+}
+
 function locationLink($locationID, $locationName)
 {
   return "<a href=\"location?id=$locationID\">$locationName</a>";

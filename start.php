@@ -13,14 +13,15 @@ if ($query)
   }
 
 require_once("src/constants.php");
+require_once("src/link_helper.php");
 require_once("src/db.php");
 require_once("src/auth.php");
-require_once("src/link_helper.php");
 
 define("PAGE_WITHOUT_HEADER", 1);
 define("NORMAL_PAGE", 2);
 
-foreach (array("login",
+foreach (array("login_action",
+               "logoff_action",
                "add_item",
                "add_location",
                "annihilate_item",
@@ -30,7 +31,8 @@ foreach (array("login",
                "image") as $target)
   $pages[$target] = PAGE_WITHOUT_HEADER;
 
-foreach (array("home",
+foreach (array("login",
+               "home",
                "homes",
                "item",
                "items",
