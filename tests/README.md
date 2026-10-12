@@ -5,12 +5,12 @@ The tests talk to the application over HTTP, the same way a browser does, and ch
 
 ## Running locally
 
-1. Create an empty MySQL/MariaDB database and load the schema: `mysql inventory_test < setup.sql`
-2. Point `src/config.php` to it and allow the tests to wipe it (see `tests/ci/database-config.php`):
+1. Create an empty MySQL/MariaDB database, point `src/config.php` to it and allow the tests to wipe it (see `tests/ci/database-config.php`):
    ```php
    $allowTestDataWipe = true;
    ```
    **Never** set this in the production config, every test deletes all the data in the database first.
+2. `php setup_database.php` to create the tables
 3. `composer install`
 4. `vendor/bin/phpunit` (or `composer test`)
 

@@ -1,3 +1,5 @@
+-- The schema before migrations were introduced. A database that already had the tables when
+-- setup_database.php first ran gets this one marked as applied without running it.
 CREATE TABLE IF NOT EXISTS `im_category` (
   `id` int(11) NOT NULL auto_increment,
   `home_id` int(11) NOT NULL,
