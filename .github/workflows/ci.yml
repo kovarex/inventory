@@ -43,8 +43,9 @@ jobs:
 
       - name: Setup database
         run: |
-          mysql -h 127.0.0.1 -u root -proot inventory_test < setup.sql
           cp tests/ci/database-config.php src/config.php
+          php setup_database.php
+          php setup_database.php | grep -q "is up to date"
 
       - name: Run tests
         run: vendor/bin/phpunit
