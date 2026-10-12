@@ -24,7 +24,10 @@ function redirectWithMessageCustom($redirect, $message)
   $parameterDelimiter = "?";
   if (str_contains($redirect, "?"))
     $parameterDelimiter = "&";
-  header("Location: ".$redirect.$parameterDelimiter."message=".urlencode($message));
+  if (empty($message))
+    header("Location: ".$redirect);
+  else
+    header("Location: ".$redirect.$parameterDelimiter."message=".urlencode($message));
   die();
 }
 
