@@ -2,6 +2,7 @@
 // Floor plans.
 // A location can have a plan image (a floor, a room, ...). Any location below it can have an area,
 // a polygon on the plan of its nearest ancestor that has a plan. Both are optional.
+// Areas nest: the plan of a floor shows the rooms, the cupboards are shown in the room, zoomed to its area.
 // The area is stored as "x,y x,y ..." with coordinates relative to the plan size (0..1),
 // so it survives replacing the plan by a version with a different resolution.
 
@@ -41,19 +42,48 @@ function nearestPlanAncestor($locations, $locationID)
   return NULL;
 }
 
-// Locations with an area drawn on the plan of the given location.
-function planAreas($locations, $planLocationID)
+// The location that shows the area of the given location: the closest ancestor with a plan, or with an area
+// that is on a plan. NULL when there is no plan above.
+function areaContainer($locations, $locationID)
+{
+  $visited = [];
+  $parentID = @$locations[$locationID]["parent_location_id"];
+  while (!empty($parentID) and isset($locations[$parentID]) and !isset($visited[$parentID]))
+  {
+    $parent = $locations[$parentID];
+    if ($parent["has_plan"])
+      return $parent;
+    if (!empty($parent["plan_area"]) and nearestPlanAncestor($locations, $parentID))
+      return $parent;
+    $visited[$parentID] = true;
+    $parentID = $parent["parent_location_id"];
+  }
+  return NULL;
+}
+
+// Locations with an area shown in the given location (on its plan, or zoomed in its area).
+function planAreas($locations, $containerID)
 {
   $result = [];
   foreach ($locations as $location)
     if (!empty($location["plan_area"]))
     {
-      $planLocation = nearestPlanAncestor($locations, $location["id"]);
-      if ($planLocation and $planLocation["id"] == $planLocationID)
+      $container = areaContainer($locations, $location["id"]);
+      if ($container and $container["id"] == $containerID)
         $result[] = $location;
     }
   usort($result, fn($a, $b) => $a["name"] <=> $b["name"]);
   return $result;
+}
+
+// Renders the given location with the areas inside it: its own plan, or the plan above zoomed to its area.
+function renderPlanOf($locations, $location, $highlightID = NULL, $editorFor = NULL)
+{
+  $areas = planAreas($locations, $location["id"]);
+  if ($location["has_plan"])
+    renderPlan($location, $areas, $highlightID, $editorFor);
+  else
+    renderPlan(nearestPlanAncestor($locations, $location["id"]), $areas, $highlightID, $editorFor, $location["plan_area"]);
 }
 
 // Parses and validates the area polygon, returns the list of [x, y] points or NULL when invalid.
@@ -93,13 +123,13 @@ function planAreaCenter($area, $width, $height)
 
 // The name of the area, written in the area so it doesn't overlap the neighbours: on one line, or a word per line
 // when that allows a bigger font, and smaller than the default size when the area is too small.
-function planLabel($area, $width, $height)
+function planLabel($area, $width, $height, $viewWidth)
 {
   $points = parsePlanArea($area["plan_area"]);
   $areaWidth = (max(array_column($points, 0)) - min(array_column($points, 0))) * $width;
   $areaHeight = (max(array_column($points, 1)) - min(array_column($points, 1))) * $height;
   [$centerX, $centerY] = planAreaCenter($area["plan_area"], $width, $height);
-  $defaultSize = max(10, round($width / 50));
+  $defaultSize = max(10, round($viewWidth / 50));
   $fittingSize = function($lines) use ($areaWidth, $areaHeight, $defaultSize)
   {
     $longest = max(array_map(fn($line) => function_exists("mb_strlen") ? mb_strlen($line) : strlen($line), $lines));
@@ -119,14 +149,30 @@ function planLabel($area, $width, $height)
 // Renders the plan of $planLocation with the areas of $areas.
 // The area of $highlightID is highlighted, the others on hover. The names of the areas are always shown.
 // With $editorFor, clicking on the plan draws the area of that location (see plan_editor in common.js).
-function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NULL)
+// With $zoomArea, only that part of the plan is shown, and the surroundings are faded.
+function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NULL, $zoomArea = NULL)
 {
   $width = (int)$planLocation["plan_width"];
   $height = (int)$planLocation["plan_height"];
+  $viewBox = [0, 0, $width, $height];
+  $zoomPoints = $zoomArea ? parsePlanArea($zoomArea) : NULL;
+  if ($zoomPoints)
+  {
+    $left = min(array_column($zoomPoints, 0)) * $width;
+    $top = min(array_column($zoomPoints, 1)) * $height;
+    $right = max(array_column($zoomPoints, 0)) * $width;
+    $bottom = max(array_column($zoomPoints, 1)) * $height;
+    $margin = max($right - $left, $bottom - $top) * 0.05;
+    $viewBox = array_map(fn($value) => round($value, 1), [$left - $margin, $top - $margin, $right - $left + 2 * $margin, $bottom - $top + 2 * $margin]);
+  }
   echo "<div class=\"plan\">";
-  echo "<svg class=\"plan-svg\" viewBox=\"0 0 ".$width." ".$height."\" xmlns=\"http://www.w3.org/2000/svg\"".
+  echo "<svg class=\"plan-svg\" viewBox=\"".implode(" ", $viewBox)."\" xmlns=\"http://www.w3.org/2000/svg\"".
+       " data-plan-width=\"".$width."\" data-plan-height=\"".$height."\"".
        ($editorFor ? " data-editor-for=\"".$editorFor."\"" : "").">";
   echo "<image href=\"image?source=location&amp;id=".$planLocation["id"]."&amp;type=plan\" width=\"".$width."\" height=\"".$height."\"/>";
+  if ($zoomPoints)
+    echo "<path class=\"plan-surroundings\" fill-rule=\"evenodd\" d=\"M0,0 H".$width." V".$height." H0 Z M".
+         planAreaToSvgPoints($zoomArea, $width, $height)." Z\"/>";
   foreach ($areas as $area)
   {
     if ($editorFor and $area["id"] == $editorFor)
@@ -139,7 +185,7 @@ function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NUL
       echo "<a href=\"location?id=".$area["id"]."\" class=\"plan-link".($area["id"] == $highlightID ? " plan-highlight" : "")."\">";
     echo "<title>".$name."</title>";
     echo "<polygon class=\"plan-area\" points=\"".planAreaToSvgPoints($area["plan_area"], $width, $height)."\"/>";
-    echo planLabel($area, $width, $height);
+    echo planLabel($area, $width, $height, $viewBox[2]);
     echo $editorFor ? "</g>" : "</a>";
   }
   echo "</svg>";

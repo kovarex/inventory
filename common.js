@@ -23,14 +23,13 @@ function planEditorInit()
   if (!svg)
     return;
   let input = document.getElementById('plan-editor-area');
-  let viewBox = svg.viewBox.baseVal;
   let polygon = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
   polygon.setAttribute('class', 'plan-area plan-editor-area');
   svg.appendChild(polygon);
   let points = [];
   if (input.value.trim() != '')
     points = input.value.trim().split(/\s+/).map(pair => pair.split(',').map(Number));
-  planEditor = {svg: svg, input: input, polygon: polygon, points: points, width: viewBox.width, height: viewBox.height};
+  planEditor = {svg: svg, input: input, polygon: polygon, points: points, width: Number(svg.dataset.planWidth), height: Number(svg.dataset.planHeight)};
   svg.addEventListener('click', function(event)
   {
     let matrix = svg.getScreenCTM().inverse();

@@ -37,3 +37,4 @@ h3 { margin: 0 auto; text-align: center;}
 .plan-editor-area {fill: rgba(255, 60, 0, 0.35); stroke: rgba(255, 60, 0, 1); pointer-events: none;}
 svg[data-editor-for] {cursor: crosshair;}
 .plan-controls {margin-top: 6px;}
+.plan-surroundings {fill: rgba(255, 255, 255, 0.75); stroke: rgba(0, 0, 0, 0.5); stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none;}

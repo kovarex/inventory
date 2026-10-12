@@ -18,12 +18,55 @@ class PlanTest extends InventoryTestCase
     $this->assertStringContainsString('image?source=location&amp;id='.$context->location('Floor 1')['id'].'&amp;type=plan', $response->body);
     $this->assertStringContainsString('<polygon class="plan-area" points="100,50 500,50 500,250"/>', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Kitchen')['id'], $response->body);
-    $this->assertStringContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link', $response->body);
+    // Shown inside the kitchen
+    $this->assertStringNotContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Bedroom')['id'].'" class="plan-link', $response->body);
     // Belongs to the plan of the bedroom
     $this->assertStringNotContainsString('location?id='.$context->location('Wardrobe')['id'].'" class="plan-link', $response->body);
     // No area
     $this->assertStringNotContainsString('location?id='.$context->location('Hall')['id'].'" class="plan-link', $response->body);
+  }
+
+  public function testRoomShowsItsCupboardsZoomedIn()
+  {
+    $context = new ContextPreparator(['locations' => [[
+      'name' => 'Floor 1',
+      'plan' => ['width' => 1000, 'height' => 500],
+      'children' => [
+        ['name' => 'Kitchen', 'area' => '0.1,0.1 0.5,0.1 0.5,0.5 0.1,0.5', 'children' => [
+          ['name' => 'Cupboard', 'area' => '0.2,0.2 0.3,0.2 0.3,0.3'],
+          ['name' => 'Fridge']]],
+        ['name' => 'Hall', 'area' => '0.6,0.1 0.9,0.1 0.9,0.9']]]]]);
+    $response = $context->client->get('/location', ['id' => $context->location('Kitchen')['id']]);
+    $this->assertPageOk($response);
+    // The kitchen area (100,50 - 500,250) with a 5% margin of its bigger side
+    $this->assertStringContainsString('viewBox="80 30 440 240"', $response->body);
+    $this->assertStringContainsString('class="plan-surroundings"', $response->body);
+    $this->assertStringContainsString('location?id='.$context->location('Cupboard')['id'].'" class="plan-link"', $response->body);
+    $this->assertStringNotContainsString('location?id='.$context->location('Hall')['id'].'" class="plan-link', $response->body);
+
+    // The cupboard is highlighted in the kitchen
+    $response = $context->client->get('/location', ['id' => $context->location('Cupboard')['id']]);
+    $this->assertStringContainsString('viewBox="80 30 440 240"', $response->body);
+    $this->assertStringContainsString('location?id='.$context->location('Cupboard')['id'].'" class="plan-link plan-highlight"', $response->body);
+
+    // The fridge is drawn in the kitchen
+    $response = $context->client->get('/location', ['id' => $context->location('Fridge')['id']]);
+    $this->assertStringContainsString('Draw the area in Kitchen', $this->planControls($response->body));
+    $response = $context->client->get('/location', ['id' => $context->location('Fridge')['id'], 'draw_area' => 1]);
+    $this->assertStringContainsString('viewBox="80 30 440 240"', $response->body);
+    $this->assertStringContainsString('data-plan-width="1000" data-plan-height="500" data-editor-for="'.$context->location('Fridge')['id'].'"', $response->body);
+  }
+
+  public function testRoomWithoutCupboardsIsHighlightedOnTheFloor()
+  {
+    $context = new ContextPreparator(['locations' => [[
+      'name' => 'Floor 1',
+      'plan' => ['width' => 1000, 'height' => 500],
+      'children' => [['name' => 'Kitchen', 'area' => self::KITCHEN_AREA, 'children' => ['Fridge']]]]]]);
+    $response = $context->client->get('/location', ['id' => $context->location('Kitchen')['id']]);
+    $this->assertStringContainsString('viewBox="0 0 1000 500"', $response->body);
+    $this->assertStringContainsString('class="plan-link plan-highlight"', $response->body);
   }
 
   public function testAreaNamesAreWrittenInTheAreas()
@@ -51,7 +94,7 @@ class PlanTest extends InventoryTestCase
       'children' => [['name' => 'Kitchen', 'children' => [['name' => 'Kitchen drawer', 'area' => self::KITCHEN_AREA]]]]]]]);
     $response = $context->client->get('/location', ['id' => $context->location('Kitchen drawer')['id']]);
     $this->assertPageOk($response);
-    $this->assertStringContainsString('On the plan of', $response->body);
+    $this->assertStringContainsString('<h2>In ', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link plan-highlight"', $response->body);
     $this->assertStringContainsString('Redraw the area', $this->planControls($response->body));
   }

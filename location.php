@@ -25,25 +25,20 @@ if ($result->num_rows == 0)
 
 $location = $result->fetch_assoc();
 
+// A location with its own plan, or with areas drawn inside its area (a room with cupboards), shows them.
+// Otherwise, a location with an area is highlighted where its area is shown.
 function showLocationPlans($planLocations, $location)
 {
   $planLocation = $planLocations[$location["id"]];
-  $parentPlan = nearestPlanAncestor($planLocations, $location["id"]);
+  $container = areaContainer($planLocations, $location["id"]);
+  $hasOwnView = $planLocation["has_plan"] ||
+                (!empty($planLocation["plan_area"]) && $container && !empty(planAreas($planLocations, $location["id"])));
 
-  if ($planLocation["has_plan"])
+  if (@$_GET["draw_area"] and $container)
   {
-    echo "<h2>Plan</h2>";
-    renderPlan($planLocation, planAreas($planLocations, $location["id"]));
-  }
-
-  if (!$parentPlan)
-    return;
-  $parentPlanLink = locationLink($parentPlan["id"], $parentPlan["name"]);
-  if (@$_GET["draw_area"])
-  {
-    echo "<h2>Drawing the area on the plan of ".$parentPlanLink."</h2>";
+    echo "<h2>Drawing the area in ".locationLink($container["id"], $container["name"])."</h2>";
     echo "<div>Click on the plan to add the corners of the area.</div>";
-    renderPlan($parentPlan, planAreas($planLocations, $parentPlan["id"]), NULL, $location["id"]);
+    renderPlanOf($planLocations, $container, NULL, $location["id"]);
     echo "<form method=\"post\" action=\"edit_location_area\" id=\"plan-editor-form\">
             <input type=\"hidden\" name=\"id\" value=\"".$location["id"]."\"/>
             <input type=\"hidden\" name=\"area\" id=\"plan-editor-area\" value=\"".htmlspecialchars($planLocation["plan_area"] ?? "")."\"/>
@@ -53,10 +48,15 @@ function showLocationPlans($planLocations, $location)
           </form>";
     echo "<div><a href=\"location?id=".$location["id"]."\">Cancel</a></div>";
   }
-  else if (!empty($planLocation["plan_area"]))
+  else if ($hasOwnView)
   {
-    echo "<h2>On the plan of ".$parentPlanLink."</h2>";
-    renderPlan($parentPlan, planAreas($planLocations, $parentPlan["id"]), $location["id"]);
+    echo "<h2>Plan".($container ? " (in ".locationLink($container["id"], $container["name"]).")" : "")."</h2>";
+    renderPlanOf($planLocations, $planLocation);
+  }
+  else if (!empty($planLocation["plan_area"]) and $container)
+  {
+    echo "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
+    renderPlanOf($planLocations, $container, $location["id"]);
   }
 }
 
@@ -64,13 +64,13 @@ function showLocationPlans($planLocations, $location)
 function showLocationPlanControls($planLocations, $location)
 {
   $planLocation = $planLocations[$location["id"]];
-  $parentPlan = nearestPlanAncestor($planLocations, $location["id"]);
+  $container = areaContainer($planLocations, $location["id"]);
 
   echo "<div class=\"plan-controls\">";
-  if ($parentPlan)
+  if ($container)
   {
     echo "<div><a href=\"location?id=".$location["id"]."&amp;draw_area=1\">".
-         (empty($planLocation["plan_area"]) ? "Draw the area on the plan of ".htmlspecialchars($parentPlan["name"]) : "Redraw the area")."</a>";
+         (empty($planLocation["plan_area"]) ? "Draw the area in ".htmlspecialchars($container["name"]) : "Redraw the area")."</a>";
     if (!empty($planLocation["plan_area"]))
       echo " <form method=\"post\" action=\"edit_location_area\" style=\"display:inline;\">
                <input type=\"hidden\" name=\"id\" value=\"".$location["id"]."\"/>
