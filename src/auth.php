@@ -4,6 +4,7 @@ session_set_cookie_params(3600 * 24 * 7);
 session_start();
 if (empty($_SESSION["user"]))
   if ($pagePath != "login" and
+      $pagePath != "register" and
       $pagePath != "login_action" and
       $pagePath != "reset_password" and
       $pagePath != "reset_password_action" and
