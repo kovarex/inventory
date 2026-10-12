@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS `im_home` (
 CREATE TABLE IF NOT EXISTS `im_home_user` (
   `home_id` int(11) NOT NULL,
   `user_id` int(11) NOT NULL,
-  `last_home_id` int(11) default NULL,
+  `is_admin` tinyint(1) NOT NULL default 0,
   KEY `home_id` (`home_id`,`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_bin;
 
@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `im_transaction` (
   `user_id` int(11) default NULL,
   `timestamp` timestamp NOT NULL default CURRENT_TIMESTAMP,
   `comment` varchar(1024) collate utf8_czech_ci default NULL,
-  `action_id ` int(11) default NULL,
+  `action_id` int(11) default NULL,
   PRIMARY KEY  (`id`),
   KEY `item_id` (`item_id`,`from_location_id`,`to_location_id`),
   KEY `im_transcation_im_location_from_FK` (`from_location_id`),
@@ -81,6 +81,7 @@ CREATE TABLE IF NOT EXISTS `im_user` (
   `email` varchar(256) collate utf8_czech_ci NOT NULL,
   `reset_password_secret` INT UNSIGNED NULL DEFAULT NULL,
   `reset_password_timestamp` TIMESTAMP NULL DEFAULT NULL,
+  `last_home_id` int(11) default NULL,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)

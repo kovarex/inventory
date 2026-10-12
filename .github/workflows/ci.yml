@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+
+    strategy:
+      matrix:
+        php: ['8.3', '8.4']
+
+    services:
+      mysql:
+        image: mariadb:10.11
+        env:
+          MARIADB_ROOT_PASSWORD: root
+          MARIADB_DATABASE: inventory_test
+        ports:
+          - 3306:3306
+        options: --health-cmd="mariadb-admin ping -h localhost -u root -proot" --health-interval=10s --health-timeout=5s --health-retries=5
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          extensions: mysqli, gd, curl
+
+      - name: Composer install
+        run: composer install --prefer-dist --no-interaction
+
+      - name: Setup database
+        run: |
+          mysql -h 127.0.0.1 -u root -proot inventory_test < setup.sql
+          cp tests/ci/database-config.php src/config.php
+
+      - name: Run tests
+        run: vendor/bin/phpunit
+
+      - name: Show server log
+        if: failure()
+        run: cat /tmp/inventory-test-server.log || true
