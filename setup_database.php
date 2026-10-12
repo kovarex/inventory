@@ -1,5 +1,6 @@
+#!/usr/bin/env php
 <?php
-// Creates or upgrades the database configured in src/config.php: php setup_database.php
+// Creates or upgrades the database configured in src/config.php: ./setup_database.php
 //
 // The schema lives in migrations/*.sql, applied in the order of their file names.
 // Applied migrations are recorded in im_migration, so running this again only applies the new ones.
