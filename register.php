@@ -28,8 +28,7 @@ function tryToRegister($username, $password, $email)
 
   $_SESSION["user"] = query("SELECT * FROM im_user where username='{$db->real_escape_string($username)}'")->fetch_assoc();
   $_SESSION["home"] = NULL;
-  header("Location: /");
-  return true;
+  redirect("/");
 }
 
 if (!empty($_POST["username"]))
