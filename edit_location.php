@@ -1,6 +1,7 @@
 <?php
 require_once("src/location_helper.php");
 require_once("src/image_upload_helper.php");
+require_once("src/transaction_log.php");
 
 $queryRightCheck = " and home_id=".homeID();
 $imageData = tryToProcessImageUpload();
@@ -30,7 +31,7 @@ if ($validMove)
                     parent_location_id=".escape($_POST["parent_id"]).
                     (isset($imageData) ? ",image=X".escape($imageData["big"]) : "").
                     (isset($imageData) ? ",thumbnail=X".escape($imageData["thumbnail"]) : "").
-                   " WHERE id=".escape($_POST["id"]).$queryRightCheck, true);
+                   " WHERE id=".escape($_POST["id"]).$queryRightCheck);
   if ($updated && $oldParentLocation != $_POST["parent_id"])
     locationMoved($_POST["id"], $oldParentLocation, $_POST["parent_id"], $_POST["comment"], $locationChildren);
 }
