@@ -7,6 +7,9 @@ function tryToRegister($username, $password, $email)
   if (empty($username))
     return "Username must be specified.";
 
+  if (empty($password))
+    return "Password must be specified.";
+
   $result = query("SELECT * from im_user where im_user.username LIKE '".
                   $db->real_escape_string($username)."'");
 
@@ -22,7 +25,7 @@ function tryToRegister($username, $password, $email)
   query("INSERT INTO im_user(username, password, email)
         values('{$db->real_escape_string($username)}',
                '{$db->real_escape_string(password_hash($password, PASSWORD_DEFAULT))}',
-               '{$db->real_escape_string($email)}')", true);
+               '{$db->real_escape_string($email)}')");
 
   $_SESSION["user"] = query("SELECT * FROM im_user where username='{$db->real_escape_string($username)}'")->fetch_assoc();
   $_SESSION["home"] = NULL;
@@ -32,7 +35,7 @@ function tryToRegister($username, $password, $email)
 
 if (!empty($_POST["username"]))
 {
-  $error = tryToRegister($_POST["username"], $_POST["passwowrd"], $_POST["email"]);
+  $error = tryToRegister($_POST["username"], $_POST["password"], $_POST["email"]);
   if (!empty($error))
     echo "Register error: ".$error;
 }
