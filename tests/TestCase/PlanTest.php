@@ -36,7 +36,7 @@ class PlanTest extends InventoryTestCase
     $this->assertPageOk($response);
     $this->assertStringContainsString('On the plan of', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link plan-highlight"', $response->body);
-    $this->assertStringContainsString('Redraw the area', $response->body);
+    $this->assertStringContainsString('Redraw the area', $this->planControls($response->body));
   }
 
   public function testLocationWithoutPlansHasNoPlanSection()
@@ -46,7 +46,7 @@ class PlanTest extends InventoryTestCase
     $this->assertPageOk($response);
     $this->assertStringNotContainsString('<svg', $response->body);
     $this->assertStringNotContainsString('Draw the area', $response->body);
-    $this->assertStringContainsString('Add a plan', $response->body);
+    $this->assertStringContainsString('Add a plan', $this->planControls($response->body));
   }
 
   public function testDrawAreaPageShowsEditor()
@@ -152,5 +152,18 @@ class PlanTest extends InventoryTestCase
     $file = tempnam(sys_get_temp_dir(), "inventory-test-plan").".svg";
     file_put_contents($file, $content);
     return $file;
+  }
+
+  // The plan setup controls, which have to be inside the edit dialog so they don't clutter the page.
+  private function planControls(string $body): string
+  {
+    $dialog = strpos($body, 'id="edit-dialog"');
+    $controls = strpos($body, '<div class="plan-controls">');
+    $this->assertNotFalse($dialog);
+    $this->assertNotFalse($controls);
+    $this->assertGreaterThan($dialog, $controls);
+    $this->assertStringNotContainsString('</div>', substr($body, $dialog, $controls - $dialog), 'The plan controls are outside of the edit dialog.');
+    $this->assertSame(1, substr_count($body, '<div class="plan-controls">'));
+    return substr($body, $controls);
   }
 }

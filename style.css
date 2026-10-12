@@ -36,3 +36,4 @@ h3 { margin: 0 auto; text-align: center;}
 .plan-reference .plan-label {display: block; fill: #666;}
 .plan-editor-area {fill: rgba(255, 60, 0, 0.35); stroke: rgba(255, 60, 0, 1); pointer-events: none;}
 svg[data-editor-for] {cursor: crosshair;}
+.plan-controls {margin-top: 6px;}
