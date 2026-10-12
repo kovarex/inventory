@@ -26,9 +26,9 @@ if (empty($_SESSION["home"]))
       $_SESSION["home"]["is_admin"] = $myHomesSelect->fetch_assoc()["is_admin"];
     }
   }
-  else
+  else if ($pagePath != "homes" and $pagePath != "logoff_action")
   {
-    header("Location: /home");
+    header("Location: /homes");
     die();
   }
 }
