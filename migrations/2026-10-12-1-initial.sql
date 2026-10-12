@@ -1,3 +1,5 @@
+-- The schema before migrations were introduced. A database that already had the tables when
+-- setup_database.php first ran gets this one marked as applied without running it.
 CREATE TABLE IF NOT EXISTS `im_category` (
   `id` int(11) NOT NULL auto_increment,
   `home_id` int(11) NOT NULL,
@@ -48,11 +50,6 @@ CREATE TABLE IF NOT EXISTS `im_location` (
   `description` varchar(512) collate utf8_czech_ci default NULL,
   `image` longblob,
   `thumbnail` longblob,
-  `plan` longblob default NULL,
-  `plan_type` varchar(64) default NULL,
-  `plan_width` int(11) default NULL,
-  `plan_height` int(11) default NULL,
-  `plan_area` varchar(4096) default NULL,
   PRIMARY KEY  (`id`),
   KEY `parent_location_id` (`parent_location_id`),
   KEY `home_id` (`home_id`)
