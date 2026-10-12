@@ -62,4 +62,41 @@ class LocationTest extends InventoryTestCase
       'redirect' => '/locations']);
     $this->assertNull(TestDb::value("SELECT parent_location_id FROM im_location WHERE id=".$context->location('Toolbox')['id']));
   }
+
+  private function assertNamesInOrder(array $expected, string $body)
+  {
+    preg_match_all('/'.implode('|', array_map(fn($name) => preg_quote($name, '/'), $expected)).'/u', $body, $matches);
+    $this->assertSame($expected, array_values(array_unique($matches[0])));
+  }
+
+  private function unsortedLocations()
+  {
+    // Created out of order, so the database returns them out of order too.
+    return ['locations' => [['name' => 'Room', 'children' => [
+      ['name' => 'Skříň 3L', 'children' => ['Shelf']],
+      'Skříň 3A',
+      'skříň 3K',
+      'Box 10',
+      'Box 2']]]];
+  }
+
+  public function testLocationsPageSortsLocationsAlphabetically()
+  {
+    $context = new ContextPreparator($this->unsortedLocations());
+    $response = $context->client->get('/locations');
+    $this->assertPageOk($response);
+    // The parent selector of the add form comes first, then the table.
+    [$selector, $table] = explode('</select>', $response->body, 2);
+    $expected = ['Box 2', 'Box 10', 'Skříň 3A', 'skříň 3K', 'Skříň 3L'];
+    $this->assertNamesInOrder($expected, $selector);
+    $this->assertNamesInOrder($expected, $table);
+  }
+
+  public function testLocationPageSortsLocationsAlphabetically()
+  {
+    $context = new ContextPreparator($this->unsortedLocations());
+    $response = $context->client->get('/location', ['id' => $context->location('Room')['id']]);
+    $this->assertPageOk($response);
+    $this->assertNamesInOrder(['Box 2', 'Box 10', 'Skříň 3A', 'skříň 3K', 'Skříň 3L'], $response->body);
+  }
 }
