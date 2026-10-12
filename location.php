@@ -1,6 +1,7 @@
 <?php
 require_once("src/item_helper.php");
 require_once("src/location_helper.php");
+require_once("src/plan_helper.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
@@ -16,12 +17,76 @@ $result = query("SELECT
                    length(im_location.image) > 0 as has_image
                  FROM im_location
                  WHERE
-                   im_location.id=$id");
+                   im_location.id=$id AND
+                   im_location.home_id=".homeID());
 
 if ($result->num_rows == 0)
   die("Location not found!");
 
 $location = $result->fetch_assoc();
+
+function showLocationPlans($location)
+{
+  $planLocations = planLocations();
+  $planLocation = $planLocations[$location["id"]];
+  $parentPlan = nearestPlanAncestor($planLocations, $location["id"]);
+
+  if ($planLocation["has_plan"])
+  {
+    echo "<h2>Plan</h2>";
+    renderPlan($planLocation, planAreas($planLocations, $location["id"]));
+  }
+
+  if ($parentPlan)
+  {
+    $parentPlanLink = locationLink($parentPlan["id"], $parentPlan["name"]);
+    if (@$_GET["draw_area"])
+    {
+      echo "<h2>Drawing the area on the plan of ".$parentPlanLink."</h2>";
+      echo "<div>Click on the plan to add the corners of the area.</div>";
+      renderPlan($parentPlan, planAreas($planLocations, $parentPlan["id"]), NULL, $location["id"]);
+      echo "<form method=\"post\" action=\"edit_location_area\" id=\"plan-editor-form\">
+              <input type=\"hidden\" name=\"id\" value=\"".$location["id"]."\"/>
+              <input type=\"hidden\" name=\"area\" id=\"plan-editor-area\" value=\"".htmlspecialchars($planLocation["plan_area"] ?? "")."\"/>
+              <button type=\"button\" onclick=\"planEditorUndo();\">Undo point</button>
+              <button type=\"button\" onclick=\"planEditorClear();\">Clear</button>
+              <input type=\"submit\" value=\"Save area\"/>
+            </form>";
+      echo "<div><a href=\"location?id=".$location["id"]."\">Cancel</a></div>";
+    }
+    else
+    {
+      if (!empty($planLocation["plan_area"]))
+      {
+        echo "<h2>On the plan of ".$parentPlanLink."</h2>";
+        renderPlan($parentPlan, planAreas($planLocations, $parentPlan["id"]), $location["id"]);
+      }
+      echo "<div><a href=\"location?id=".$location["id"]."&amp;draw_area=1\">".
+           (empty($planLocation["plan_area"]) ? "Draw the area on the plan of ".htmlspecialchars($parentPlan["name"]) : "Redraw the area")."</a>";
+      if (!empty($planLocation["plan_area"]))
+        echo " <form method=\"post\" action=\"edit_location_area\" style=\"display:inline;\">
+                 <input type=\"hidden\" name=\"id\" value=\"".$location["id"]."\"/>
+                 <input type=\"hidden\" name=\"area\" value=\"\"/>
+                 <input type=\"submit\" value=\"Remove the area\"/>
+               </form>";
+      echo "</div>";
+    }
+  }
+
+  echo "<div style=\"margin: 10px 0;\"><form method=\"post\" action=\"edit_location_plan\" enctype=\"multipart/form-data\" class=\"data-form\">
+          <input type=\"hidden\" name=\"id\" value=\"".$location["id"]."\"/>
+          <label for=\"plan\">".($planLocation["has_plan"] ? "Replace the plan" : "Add a plan (floor, room, ...)").":</label>
+          <input type=\"file\" name=\"plan\" accept=\".svg,image/svg+xml,image/png,image/jpeg,image/gif,image/webp\"/>
+          <input type=\"submit\" value=\"Upload plan\"/>
+        </form>";
+  if ($planLocation["has_plan"])
+    echo " <form method=\"post\" action=\"edit_location_plan\" style=\"display:inline;\">
+             <input type=\"hidden\" name=\"id\" value=\"".$location["id"]."\"/>
+             <input type=\"hidden\" name=\"remove\" value=\"1\"/>
+             <input type=\"submit\" value=\"Remove the plan\"/>
+           </form>";
+  echo "</div>";
+}
 
 echo "<h1>Location: ".$location["name"]."</h1>";
 echo "<div>".$location["description"]."</div>";
@@ -32,6 +97,8 @@ locationForm("edit", $location, "location?id=".$_GET["id"]);
 echo "</div>";
 
 echo "<div>".locationImage($location["id"], $location["has_image"], "big")."</div>";
+
+showLocationPlans($location);
 
 echo "<br/><br/>";
 itemForm("add", NULL, "location?id=".$_GET["id"], $_GET["id"]);

@@ -9,6 +9,7 @@
 //   'other-homes' => [['name' => 'Cottage']],
 //   'categories' => ['Books', ['name' => 'Tools', 'description' => 'Hand tools']],
 //   'locations' => ['Garage', ['name' => '1A', 'children' => ['Top shelf', 'Bottom shelf']]],
+//   'locations' => [['name' => 'Floor 1', 'plan' => true, 'children' => [['name' => 'Kitchen', 'area' => '0,0 0.5,0 0.5,0.5']]]],
 //   'items' => [['name' => 'Hammer', 'location' => 'Garage', 'category' => 'Tools', 'deleted' => true]],
 // ]);
 //
@@ -177,17 +178,45 @@ class ContextPreparator
     $location["name"] = self::extract("name", $input);
     $location["description"] = self::extract("description", $input);
     $location["parent_location_id"] = $parent ? $parent["id"] : null;
+    $location["plan_area"] = self::extract("area", $input);
+    $plan = self::extract("plan", $input);
     $children = self::extract("children", $input);
 
     $location["id"] = TestDb::insert("im_location", [
       "home_id" => $this->homeID(),
       "name" => $location["name"],
       "description" => $location["description"],
-      "parent_location_id" => $location["parent_location_id"]]);
+      "parent_location_id" => $location["parent_location_id"],
+      "plan_area" => $location["plan_area"]]);
+    if ($plan)
+      $this->preparePlan($location, $plan === true ? [] : $plan);
     $this->locations[$location["name"]] = $location;
     $this->prepareLocations($children, $location);
     self::checkOptionsConsumed($input);
     return $location;
+  }
+
+  // The plan is a simple SVG of the given size unless 'svg' is given.
+  private function preparePlan(array &$location, array $input): void
+  {
+    $width = self::extract("width", $input) ?? 1000;
+    $height = self::extract("height", $input) ?? 500;
+    $svg = self::extract("svg", $input) ?? self::planSvg($width, $height);
+    self::checkOptionsConsumed($input);
+    TestDb::query("UPDATE im_location SET
+                     plan=".TestDb::escape($svg).",
+                     plan_type='image/svg+xml',
+                     plan_width=".$width.",
+                     plan_height=".$height."
+                   WHERE id=".$location["id"]);
+    $location["plan_width"] = $width;
+    $location["plan_height"] = $height;
+  }
+
+  public static function planSvg(int $width, int $height): string
+  {
+    return "<svg xmlns=\"http://www.w3.org/2000/svg\" viewBox=\"0 0 ".$width." ".$height."\">".
+           "<rect x=\"0\" y=\"0\" width=\"".$width."\" height=\"".$height."\" fill=\"none\" stroke=\"black\"/></svg>";
   }
 
   private function prepareItems(?array $input): void
