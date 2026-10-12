@@ -91,8 +91,33 @@ function planAreaCenter($area, $width, $height)
   return [round($x * $width, 1), round($y * $height, 1)];
 }
 
+// The name of the area, written in the area so it doesn't overlap the neighbours: on one line, or a word per line
+// when that allows a bigger font, and smaller than the default size when the area is too small.
+function planLabel($area, $width, $height)
+{
+  $points = parsePlanArea($area["plan_area"]);
+  $areaWidth = (max(array_column($points, 0)) - min(array_column($points, 0))) * $width;
+  $areaHeight = (max(array_column($points, 1)) - min(array_column($points, 1))) * $height;
+  [$centerX, $centerY] = planAreaCenter($area["plan_area"], $width, $height);
+  $defaultSize = max(10, round($width / 50));
+  $fittingSize = function($lines) use ($areaWidth, $areaHeight, $defaultSize)
+  {
+    $longest = max(array_map(fn($line) => function_exists("mb_strlen") ? mb_strlen($line) : strlen($line), $lines));
+    return min($defaultSize, $areaWidth * 0.9 / ($longest * 0.6), $areaHeight * 0.9 / (count($lines) * 1.2));
+  };
+  $lines = [$area["name"]];
+  $words = preg_split("/\s+/", trim($area["name"]));
+  if (count($words) > 1 and $fittingSize($words) > $fittingSize($lines))
+    $lines = $words;
+  $fontSize = max(6, round($fittingSize($lines), 1));
+  $result = "<text class=\"plan-label\" x=\"".$centerX."\" y=\"".$centerY."\" font-size=\"".$fontSize."\">";
+  foreach ($lines as $index => $line)
+    $result .= "<tspan x=\"".$centerX."\" dy=\"".($index == 0 ? round(-(count($lines) - 1) * 0.6, 1) : 1.2)."em\">".htmlspecialchars($line)."</tspan>";
+  return $result."</text>";
+}
+
 // Renders the plan of $planLocation with the areas of $areas.
-// The area of $highlightID is highlighted, the others are only shown on hover.
+// The area of $highlightID is highlighted, the others on hover. The names of the areas are always shown.
 // With $editorFor, clicking on the plan draws the area of that location (see plan_editor in common.js).
 function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NULL)
 {
@@ -107,7 +132,6 @@ function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NUL
     if ($editorFor and $area["id"] == $editorFor)
       continue; // drawn by the editor
     $name = htmlspecialchars($area["name"]);
-    [$centerX, $centerY] = planAreaCenter($area["plan_area"], $width, $height);
     // While drawing, the other areas are only shown for reference, so clicks go to the editor
     if ($editorFor)
       echo "<g class=\"plan-link plan-reference\">";
@@ -115,7 +139,7 @@ function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NUL
       echo "<a href=\"location?id=".$area["id"]."\" class=\"plan-link".($area["id"] == $highlightID ? " plan-highlight" : "")."\">";
     echo "<title>".$name."</title>";
     echo "<polygon class=\"plan-area\" points=\"".planAreaToSvgPoints($area["plan_area"], $width, $height)."\"/>";
-    echo "<text class=\"plan-label\" x=\"".$centerX."\" y=\"".$centerY."\" font-size=\"".max(10, round($width / 50))."\">".$name."</text>";
+    echo planLabel($area, $width, $height);
     echo $editorFor ? "</g>" : "</a>";
   }
   echo "</svg>";

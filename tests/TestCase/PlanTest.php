@@ -26,6 +26,23 @@ class PlanTest extends InventoryTestCase
     $this->assertStringNotContainsString('location?id='.$context->location('Hall')['id'].'" class="plan-link', $response->body);
   }
 
+  public function testAreaNamesAreWrittenInTheAreas()
+  {
+    $context = new ContextPreparator(['locations' => [[
+      'name' => 'Floor 1',
+      'plan' => ['width' => 1000, 'height' => 500],
+      'children' => [
+        ['name' => 'Big kitchen', 'area' => '0,0 0.5,0 0.5,1 0,1'],
+        ['name' => 'Tiny storage room', 'area' => '0.9,0 0.95,0 0.95,0.2 0.9,0.2']]]]]);
+    $body = $context->client->get('/location', ['id' => $context->location('Floor 1')['id']])->body;
+    // Enough space, one line of the default size
+    $this->assertStringContainsString('<text class="plan-label" x="250" y="250" font-size="20"><tspan x="250" dy="0em">Big kitchen</tspan></text>', $body);
+    // Narrow area, a word per line, smaller
+    $this->assertMatchesRegularExpression('#<text class="plan-label"[^>]* font-size="([0-9.]+)"><tspan[^>]*>Tiny</tspan><tspan[^>]*>storage</tspan><tspan[^>]*>room</tspan></text>#', $body);
+    preg_match('#font-size="([0-9.]+)"><tspan[^>]*>Tiny#', $body, $size);
+    $this->assertLessThan(20, (float)$size[1]);
+  }
+
   public function testLocationIsHighlightedOnThePlanAbove()
   {
     $context = new ContextPreparator(['locations' => [[
