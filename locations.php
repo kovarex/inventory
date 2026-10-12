@@ -19,7 +19,7 @@ if (@$_POST["action"] == "delete")
   query("DELETE FROM im_location where id='".
         $db->real_escape_string($_POST["id"])."'".$queryRightCheck);
 locationForm("add", NULL, "locations");
-buildLocationStructure(locationChildren('NULL'), $structuredData, $locationPointers);
+buildLocationStructureSorted(locationChildren('NULL'), $structuredData, $locationPointers);
 
 if (count($structuredData) != 0)
 {

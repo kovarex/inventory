@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
-// Creates or upgrades the database configured in src/config.php: ./setup_database.php
+// Creates or upgrades the database configured in src/config.php: ./setup_database.php [host]
+// When config.php chooses the database by $_SERVER["HTTP_HOST"], pass the site's host name,
+// e.g. ./setup_database.php test.im.kovarex.com
 //
 // The schema lives in migrations/*.sql, applied in the order of their file names.
 // Applied migrations are recorded in im_migration, so running this again only applies the new ones.
@@ -10,7 +12,14 @@ if (PHP_SAPI != "cli")
   die("Run from the command line: php setup_database.php\n");
 
 chdir(__DIR__);
+$_SERVER["HTTP_HOST"] = $argv[1] ?? "";
 require "src/config.php";
+if (empty($dbName))
+{
+  echo "src/config.php didn't set a database".(empty($argv[1]) ? ", if it depends on the host, pass it: ./setup_database.php im.kovarex.com" : " for host ".$argv[1]).".\n";
+  exit(1);
+}
+echo "Database ".$dbName." on ".$dbServer."\n";
 mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 $db = new mysqli($dbServer, $dbUser, $dbPassword, $dbName);
 $db->set_charset("utf8");

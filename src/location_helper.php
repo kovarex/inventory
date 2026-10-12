@@ -89,11 +89,30 @@ function locationSelector($inputName, $preselectedID)
   echo "</select>";
 }
 
+// Alphabetical order for names: case insensitive, numbers compared by value ("Box 2" before "Box 10"),
+// and letters with diacritics next to their base letter when the intl extension is available.
+function compareByName($item1, $item2)
+{
+  static $collator = NULL;
+  if ($collator === NULL)
+  {
+    $collator = false;
+    if (class_exists("Collator"))
+    {
+      $collator = new Collator("cs_CZ");
+      $collator->setAttribute(Collator::NUMERIC_COLLATION, Collator::ON);
+    }
+  }
+  if ($collator)
+    return $collator->compare($item1['name'], $item2['name']);
+  return strnatcasecmp($item1['name'], $item2['name']);
+}
+
 function sortLocationStructureRecursive(&$structuredData, &$locationPointers)
 {
   if (!empty($structuredData["locations"]))
   {
-    usort($structuredData["locations"], function ($item1, $item2) { return $item1['name'] <=> $item2['name']; });
+    usort($structuredData["locations"], 'compareByName');
     foreach($structuredData["locations"] as &$innerLocation)
     {
       $locationPointers[$innerLocation["id"]] = &$innerLocation;
@@ -102,7 +121,7 @@ function sortLocationStructureRecursive(&$structuredData, &$locationPointers)
   }
 
   if (!empty($structuredData["items"]))
-    usort($structuredData["items"], function ($item1, $item2) { return $item1['name'] <=> $item2['name']; });
+    usort($structuredData["items"], 'compareByName');
 }
 
 function buildLocationStructureSorted($flatLocationData, &$structuredData, &$locationPointers)
