@@ -70,6 +70,46 @@ class ItemTest extends InventoryTestCase
     $this->assertSame($item['thumbnail'], $image->body);
   }
 
+  public function testAddItemWithRotatedPhonePhoto()
+  {
+    $context = new ContextPreparator(['locations' => ['Garage'], 'categories' => ['Tools']]);
+    // Taken in portrait: stored as landscape (left half red, right half blue) with EXIF "rotate 90° clockwise"
+    $imageFile = $this->createPhonePhoto(4032, 3024, 6);
+    $response = $context->client->post('/add_item', [
+      'name' => 'Hammer',
+      'description' => '',
+      'author' => '',
+      'location_id' => $context->location('Garage')['id'],
+      'category_id' => $context->category('Tools')['id'],
+      'comment' => '',
+      'redirect' => '/items'], ['image' => $imageFile]);
+    $this->assertSame('/items', $response->location(), $response->body);
+    $item = TestDb::row("SELECT * FROM im_item WHERE name='Hammer'");
+    $this->assertSame([375, 500], array_slice(getimagesizefromstring($item['image']), 0, 2));
+    $this->assertSame([75, 100], array_slice(getimagesizefromstring($item['thumbnail']), 0, 2));
+
+    $image = imagecreatefromstring($item['image']);
+    $this->assertGreaterThan(200, imagecolorat($image, 187, 100) >> 16 & 0xFF, "the top should be red");
+    $this->assertGreaterThan(200, imagecolorat($image, 187, 400) & 0xFF, "the bottom should be blue");
+  }
+
+  public function testUnreadableImageIsReported()
+  {
+    $context = new ContextPreparator(['locations' => ['Garage'], 'categories' => ['Tools']]);
+    // A valid JPEG header, so getimagesize() accepts it, but the data is cut off
+    $imageFile = tempnam(sys_get_temp_dir(), "inventory-test-image").".jpg";
+    file_put_contents($imageFile, substr(file_get_contents($this->createPhonePhoto(800, 600, 1)), 0, 300));
+    $response = $context->client->post('/add_item', [
+      'name' => 'Hammer',
+      'description' => '',
+      'author' => '',
+      'location_id' => $context->location('Garage')['id'],
+      'category_id' => $context->category('Tools')['id'],
+      'comment' => '',
+      'redirect' => '/items'], ['image' => $imageFile]);
+    $this->assertStringContainsString("The image couldn't be read", $response->body);
+  }
+
   public function testMoveItem()
   {
     $context = new ContextPreparator(['locations' => ['Cellar'], 'items' => [['name' => 'Hammer', 'location' => 'Garage', 'category' => 'Tools']]]);
@@ -135,6 +175,23 @@ class ItemTest extends InventoryTestCase
     imagefill($image, 0, 0, imagecolorallocate($image, 200, 100, 50));
     $file = tempnam(sys_get_temp_dir(), "inventory-test-image").".png";
     imagepng($image, $file);
+    return $file;
+  }
+
+  private function createPhonePhoto(int $width, int $height, int $exifOrientation): string
+  {
+    $image = imagecreatetruecolor($width, $height);
+    imagefilledrectangle($image, 0, 0, $width / 2 - 1, $height - 1, imagecolorallocate($image, 255, 0, 0));
+    imagefilledrectangle($image, $width / 2, 0, $width - 1, $height - 1, imagecolorallocate($image, 0, 0, 255));
+    ob_start();
+    imagejpeg($image, NULL, 90);
+    $jpeg = ob_get_clean();
+    // EXIF segment with only the Orientation tag, inserted right after the JPEG start marker
+    $tiff = "II*\0".pack("V", 8).pack("v", 1).pack("vvVvv", 0x0112, 3, 1, $exifOrientation, 0).pack("V", 0);
+    $exif = "Exif\0\0".$tiff;
+    $jpeg = substr($jpeg, 0, 2)."\xFF\xE1".pack("n", strlen($exif) + 2).$exif.substr($jpeg, 2);
+    $file = tempnam(sys_get_temp_dir(), "inventory-test-image").".jpg";
+    file_put_contents($file, $jpeg);
     return $file;
   }
 }
