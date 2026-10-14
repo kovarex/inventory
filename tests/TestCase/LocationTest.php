@@ -51,6 +51,19 @@ class LocationTest extends InventoryTestCase
     $this->assertSame('tidying', $transaction['comment']);
   }
 
+  public function testEditLocationCode()
+  {
+    $context = new ContextPreparator(['locations' => ['Skříň 1A']]);
+    $id = $context->location('Skříň 1A')['id'];
+    $edit = fn($code) => $context->client->post('/edit_location', [
+      'id' => $id, 'name' => 'Skříň 1A', 'code' => $code, 'description' => '', 'parent_id' => '', 'redirect' => '/locations']);
+    $edit(' 1A ');
+    $this->assertSame('1A', TestDb::value("SELECT code FROM im_location WHERE id=".$id));
+    $this->assertStringContainsString('name="code" value="1A"', $context->client->get('/location', ['id' => $id])->body);
+    $edit('');
+    $this->assertNull(TestDb::value("SELECT code FROM im_location WHERE id=".$id));
+  }
+
   public function testCantMoveLocationIntoItsChild()
   {
     $context = new ContextPreparator(['locations' => [['name' => 'Toolbox', 'children' => ['Drawer']]]]);

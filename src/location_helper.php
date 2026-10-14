@@ -47,6 +47,10 @@ function locationForm($formAction, $locationToEdit, $redirect, $predefinedLocati
           <td><input type=\"text\" name=\"name\" value=\"".@$locationToEdit["name"]."\"/></td>
         </tr>";
   echo "<tr>
+          <td><label for=\"code\">Code:</label></td>
+          <td><input type=\"text\" name=\"code\" value=\"".htmlspecialchars(@$locationToEdit["code"] ?? "")."\" placeholder=\"Short label on the plan, like 1A\"/></td>
+        </tr>";
+  echo "<tr>
           <td><label for=\"description\">Description:</label></td>
           <td><input type=\"text\" name=\"description\" value=\"".@$locationToEdit['description']."\"></td>
         </tr>";
