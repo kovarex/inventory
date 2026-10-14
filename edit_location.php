@@ -27,6 +27,7 @@ if ($validMove)
 {
   $updated = query("UPDATE im_location SET
                     name=".escape($_POST["name"]).",
+                    code=".(trim($_POST["code"] ?? "") == "" ? "NULL" : escape(trim($_POST["code"]))).",
                     description=".escape($_POST["description"]).",
                     parent_location_id=".escape($_POST["parent_id"]).
                     (isset($imageData) ? ",image=X".escape($imageData["big"]) : "").

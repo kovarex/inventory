@@ -86,19 +86,20 @@ class PlanTest extends InventoryTestCase
     $this->assertLessThan(20, (float)$size[1]);
   }
 
-  public function testAreasNamedWithCodeShowJustTheCode()
+  public function testAreaWithCodeShowsTheCode()
   {
     $context = new ContextPreparator(['locations' => [[
       'name' => 'Floor 1',
       'plan' => ['width' => 1000, 'height' => 500],
       'children' => [
-        ['name' => 'Skříň 1J - věci na vrácení', 'area' => '0,0 0.5,0 0.5,1 0,1'],
-        ['name' => '1B - GO', 'area' => '0.5,0 1,0 1,1 0.5,1']]]]]);
+        ['name' => 'Skříň 1J - věci na vrácení', 'code' => '1J', 'area' => '0,0 0.5,0 0.5,1 0,1'],
+        ['name' => 'Box A4', 'area' => '0.5,0 1,0 1,1 0.5,1']]]]]);
     $body = $context->client->get('/location', ['id' => $context->location('Floor 1')['id']])->body;
     $this->assertStringContainsString('<tspan x="250" dy="0em">1J</tspan></text>', $body);
-    $this->assertStringContainsString('<tspan x="750" dy="0em">1B</tspan></text>', $body);
     // The full name stays in the tooltip
     $this->assertStringContainsString('<title>Skříň 1J - věci na vrácení</title>', $body);
+    // Without a code, the name is shown
+    $this->assertStringContainsString('<tspan x="750" dy="0em">Box A4</tspan></text>', $body);
   }
 
   public function testLocationIsHighlightedOnThePlanAbove()

@@ -177,6 +177,7 @@ class ContextPreparator
     $location = [];
     $location["name"] = self::extract("name", $input);
     $location["description"] = self::extract("description", $input);
+    $location["code"] = self::extract("code", $input);
     $location["parent_location_id"] = $parent ? $parent["id"] : null;
     $location["plan_area"] = self::extract("area", $input);
     $plan = self::extract("plan", $input);
@@ -185,6 +186,7 @@ class ContextPreparator
     $location["id"] = TestDb::insert("im_location", [
       "home_id" => $this->homeID(),
       "name" => $location["name"],
+      "code" => $location["code"],
       "description" => $location["description"],
       "parent_location_id" => $location["parent_location_id"],
       "plan_area" => $location["plan_area"]]);

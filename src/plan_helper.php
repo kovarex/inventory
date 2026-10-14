@@ -15,6 +15,7 @@ function planLocations()
   $rows = query("SELECT
                    id,
                    name,
+                   code,
                    parent_location_id,
                    plan_area,
                    plan_width,
@@ -123,17 +124,6 @@ function planAreaCenter($area, $width, $height)
 
 // The name of the area, written in the area so it doesn't overlap the neighbours: on one line, or a word per line
 // when that allows a bigger font, and smaller than the default size when the area is too small.
-// The text written in an area on the plan.
-// Locations named with a code, like "Skříň 1J - věci na vrácení", show just the code ("1J"), as such areas are small.
-// The full name stays in the location and in the tooltip of the area.
-function planLabelText($name)
-{
-  foreach (preg_split("/[\s,\-]+/u", trim($name)) as $word)
-    if (preg_match("/^(?=.*\d)(?=.*\p{L})[\p{L}\d]{2,4}$/u", $word))
-      return $word;
-  return $name;
-}
-
 function planLabel($area, $width, $height, $viewWidth)
 {
   $points = parsePlanArea($area["plan_area"]);
@@ -146,7 +136,7 @@ function planLabel($area, $width, $height, $viewWidth)
     $longest = max(array_map(fn($line) => function_exists("mb_strlen") ? mb_strlen($line) : strlen($line), $lines));
     return min($defaultSize, $areaWidth * 0.9 / ($longest * 0.6), $areaHeight * 0.9 / (count($lines) * 1.2));
   };
-  $text = planLabelText($area["name"]);
+  $text = empty($area["code"]) ? $area["name"] : $area["code"];
   $lines = [$text];
   $words = preg_split("/\s+/", trim($text));
   if (count($words) > 1 and $fittingSize($words) > $fittingSize($lines))

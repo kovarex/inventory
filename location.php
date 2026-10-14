@@ -11,6 +11,7 @@ $id = escape($_GET["id"]);
 $result = query("SELECT
                    im_location.id,
                    im_location.name,
+                   im_location.code,
                    im_location.description,
                    im_location.parent_location_id,
                    (SELECT parent_location.name FROM im_location AS parent_location WHERE im_location.parent_location_id=parent_location.id) AS parent_location_name,
