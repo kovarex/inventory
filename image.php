@@ -41,4 +41,6 @@ else
   header('Expires: '.gmdate(DATE_RFC1123,time() + 60*60*24*365));
 }
 echo $image;
+// Nothing may follow the image data, as some servers append their own output (an SVG plan wouldn't load then).
+exit;
 ?>
