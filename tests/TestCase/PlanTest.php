@@ -102,6 +102,32 @@ class PlanTest extends InventoryTestCase
     $this->assertStringContainsString('<tspan x="750" dy="0em">Box A4</tspan></text>', $body);
   }
 
+  public function testItemShowsWhereItIsOnThePlan()
+  {
+    $context = new ContextPreparator([
+      'locations' => [[
+        'name' => 'Floor 1',
+        'plan' => true,
+        'children' => [[
+          'name' => 'Kitchen',
+          'area' => '0.1,0.1 0.9,0.1 0.9,0.9 0.1,0.9',
+          'children' => [['name' => 'Cupboard', 'area' => '0.2,0.2 0.3,0.2 0.3,0.3', 'children' => ['Drawer']]]]]]],
+      'items' => [['name' => 'Spoon', 'location' => 'Drawer']]]);
+    $response = $context->client->get('/item', ['id' => $context->item('Spoon')['id']]);
+    $this->assertPageOk($response);
+    // The drawer has no area, so its cupboard is highlighted in the kitchen
+    $this->assertStringContainsString('<h2>In <a href="location?id='.$context->location('Kitchen')['id'].'"', $response->body);
+    $this->assertStringContainsString('location?id='.$context->location('Cupboard')['id'].'" class="plan-link plan-highlight"', $response->body);
+  }
+
+  public function testItemWithoutPlanShowsNoPlan()
+  {
+    $context = new ContextPreparator(['locations' => ['Garage'], 'items' => [['name' => 'Hammer', 'location' => 'Garage']]]);
+    $response = $context->client->get('/item', ['id' => $context->item('Hammer')['id']]);
+    $this->assertPageOk($response);
+    $this->assertStringNotContainsString('plan-svg', $response->body);
+  }
+
   public function testLocationIsHighlightedOnThePlanAbove()
   {
     $context = new ContextPreparator(['locations' => [[

@@ -1,6 +1,7 @@
 <?php
 require("src/item_helper.php");
 require("src/transaction_log.php");
+require_once("src/plan_helper.php");
 
 if (!isset($_GET["id"]))
   die("ID of the object not provided");
@@ -58,6 +59,8 @@ echo '
 if (!empty($item["author"]))
   echo "<tr><td>Author:</td><td>".$item["author"]."</td></tr>";
 echo "</table>";
+
+renderPlanWhere(planLocations(), $item["location_id"]);
 
 echo itemImage($item["id"], $item["has_image"], "big");
 

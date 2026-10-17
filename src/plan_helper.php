@@ -87,6 +87,26 @@ function renderPlanOf($locations, $location, $highlightID = NULL, $editorFor = N
     renderPlan(nearestPlanAncestor($locations, $location["id"]), $areas, $highlightID, $editorFor, $location["plan_area"]);
 }
 
+// Shows where the given location is: the location itself, or its closest ancestor with an area,
+// highlighted where its area is shown. Used for the location of an item. Shows nothing when there is no such area.
+function renderPlanWhere($locations, $locationID)
+{
+  $visited = [];
+  while (!empty($locationID) and isset($locations[$locationID]) and !isset($visited[$locationID]))
+  {
+    $location = $locations[$locationID];
+    $container = empty($location["plan_area"]) ? NULL : areaContainer($locations, $locationID);
+    if ($container)
+    {
+      echo "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
+      renderPlanOf($locations, $container, $locationID);
+      return;
+    }
+    $visited[$locationID] = true;
+    $locationID = $location["parent_location_id"];
+  }
+}
+
 // Parses and validates the area polygon, returns the list of [x, y] points or NULL when invalid.
 function parsePlanArea($area)
 {
