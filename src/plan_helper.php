@@ -169,7 +169,7 @@ function planLabel($area, $width, $height, $viewWidth)
 }
 
 // Renders the plan of $planLocation with the areas of $areas.
-// The area of $highlightID is highlighted, the others on hover. The names of the areas are always shown.
+// The outlines and names of the areas are always shown. The area of $highlightID is highlighted, the others on hover.
 // With $editorFor, clicking on the plan draws the area of that location (see plan_editor in common.js).
 // With $zoomArea, only that part of the plan is shown, and the surroundings are faded.
 function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NULL, $zoomArea = NULL)
