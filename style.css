@@ -25,9 +25,8 @@ h3 { margin: 0 auto; text-align: center;}
 
 .plan {max-width: 100%; margin: 10px 0;}
 .plan-svg {max-width: 100%; max-height: 80vh; border: solid 1px #ccc;}
-.plan-area {fill: rgba(0, 120, 255, 0); stroke: rgba(0, 120, 255, 0); stroke-width: 2; vector-effect: non-scaling-stroke;}
+.plan-area {fill: rgba(0, 120, 255, 0); stroke: rgba(0, 120, 255, 0.5); stroke-width: 2; vector-effect: non-scaling-stroke;}
 .plan-label {text-anchor: middle; dominant-baseline: middle; fill: #335; paint-order: stroke; stroke: white; stroke-width: 3px; pointer-events: none;}
-.plan:hover .plan-area {stroke: rgba(0, 120, 255, 0.4);}
 .plan-link:hover .plan-area {fill: rgba(0, 120, 255, 0.3); stroke: rgba(0, 120, 255, 1);}
 .plan-link:hover .plan-label, .plan-highlight .plan-label {fill: #003; font-weight: bold;}
 .plan-highlight .plan-area {fill: rgba(255, 60, 0, 0.35); stroke: rgba(255, 60, 0, 1);}
