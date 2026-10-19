@@ -32,10 +32,11 @@ class PagesTest extends InventoryTestCase
   {
     $context = new ContextPreparator();
     $body = $context->client->get('/')->body;
-    $this->assertMatchesRegularExpression('#<link rel="stylesheet" href="([^"]*/style.css)"#', $body);
-    $this->assertMatchesRegularExpression('#<script src="([^"]*/common.js)"#', $body);
-    preg_match('#href="([^"]*/style.css)"#', $body, $style);
-    preg_match('#<script src="([^"]*/common.js)"#', $body, $script);
+    // The version parameter makes browsers load the new file after each change
+    $this->assertMatchesRegularExpression('#<link rel="stylesheet" href="([^"]*/style.css)\?v=\d+"#', $body);
+    $this->assertMatchesRegularExpression('#<script src="([^"]*/common.js)\?v=\d+"#', $body);
+    preg_match('#href="([^"]*/style.css)\?#', $body, $style);
+    preg_match('#<script src="([^"]*/common.js)\?#', $body, $script);
     foreach ([$style[1], $script[1]] as $url)
       $this->assertSame(200, $context->client->get('/'.ltrim(preg_replace('#^\./#', '', $url), '/'))->status, $url);
   }
