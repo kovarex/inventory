@@ -1,4 +1,5 @@
 <?php
+require_once(__DIR__."/location_helper.php");
 // Floor plans.
 // A location can have a plan image (a floor, a room, ...). Any location below it can have an area,
 // a polygon on the plan of its nearest ancestor that has a plan. Both are optional.
@@ -77,14 +78,97 @@ function planAreas($locations, $containerID)
   return $result;
 }
 
+// Locations with an area on the same plan as the given location, at any depth below it: the rooms of a floor
+// and the cupboards in them, so the cupboards can be reached right from the floor.
+// The outer areas come first, so the inner ones are drawn over them and get the mouse.
+function planAreasDeep($locations, $containerID)
+{
+  $result = [];
+  $level = [$containerID];
+  $visited = [$containerID => true];
+  while (!empty($level))
+  {
+    $next = [];
+    foreach ($level as $parentID)
+    {
+      $areas = planAreas($locations, $parentID);
+      foreach ($areas as $area)
+        if (!isset($visited[$area["id"]]))
+        {
+          $visited[$area["id"]] = true;
+          $area["nested"] = $parentID != $containerID;
+          $result[] = $area;
+          // A location with its own plan shows its insides on that plan
+          if (!$area["has_plan"])
+            $next[] = $area["id"];
+        }
+    }
+    $level = $next;
+  }
+  return $result;
+}
+
+// The items in each location and the locations below it, indexed by the location id.
+function planItems($locations)
+{
+  $children = [];
+  foreach ($locations as $location)
+    if (!empty($location["parent_location_id"]))
+      $children[$location["parent_location_id"]][] = $location["id"];
+  $direct = [];
+  $rows = query("SELECT id, name, location_id, length(image) > 0 as has_image
+                 FROM im_item
+                 WHERE home_id=".homeID()." AND deleted=false")->fetch_all(MYSQLI_ASSOC);
+  foreach ($rows as $row)
+    $direct[$row["location_id"]][] = $row;
+  $result = [];
+  $collect = function($locationID, $visited) use (&$collect, &$result, $children, $direct)
+  {
+    if (isset($result[$locationID]))
+      return $result[$locationID];
+    $items = $direct[$locationID] ?? [];
+    $visited[$locationID] = true;
+    foreach ($children[$locationID] ?? [] as $childID)
+      if (!isset($visited[$childID]))
+        $items = array_merge($items, $collect($childID, $visited));
+    return $result[$locationID] = $items;
+  };
+  foreach ($locations as $location)
+    $collect($location["id"], []);
+  return $result;
+}
+
+define("PLAN_TOOLTIP_ITEMS", 12);
+
+// The tooltip of an area: its name and the items inside, with their pictures.
+function planTooltip($area, $items)
+{
+  usort($items, 'compareByName');
+  $result = "<div class=\"plan-tooltip-content\" data-location=\"".$area["id"]."\">";
+  $result .= "<div class=\"plan-tooltip-title\">".htmlspecialchars($area["name"]).
+             " <span class=\"item-count\">(".count($items)." item".(count($items) == 1 ? "" : "s").")</span></div>";
+  if (!empty($items))
+  {
+    $result .= "<ul class=\"plan-tooltip-items\">";
+    foreach (array_slice($items, 0, PLAN_TOOLTIP_ITEMS) as $item)
+      $result .= "<li>".($item["has_image"] ? "<img loading=\"lazy\" src=\"image?source=item&amp;id=".$item["id"]."&amp;type=thumbnail\"/>" : "").
+                 htmlspecialchars($item["name"])."</li>";
+    $result .= "</ul>";
+    if (count($items) > PLAN_TOOLTIP_ITEMS)
+      $result .= "<div>and ".(count($items) - PLAN_TOOLTIP_ITEMS)." more</div>";
+  }
+  return $result."</div>";
+}
+
 // Renders the given location with the areas inside it: its own plan, or the plan above zoomed to its area.
 function renderPlanOf($locations, $location, $highlightID = NULL, $editorFor = NULL)
 {
-  $areas = planAreas($locations, $location["id"]);
+  $areas = planAreasDeep($locations, $location["id"]);
+  $items = $editorFor ? NULL : planItems($locations);
   if ($location["has_plan"])
-    renderPlan($location, $areas, $highlightID, $editorFor);
+    renderPlan($location, $areas, $highlightID, $editorFor, NULL, $items);
   else
-    renderPlan(nearestPlanAncestor($locations, $location["id"]), $areas, $highlightID, $editorFor, $location["plan_area"]);
+    renderPlan(nearestPlanAncestor($locations, $location["id"]), $areas, $highlightID, $editorFor, $location["plan_area"], $items);
 }
 
 // Shows where the given location is: the location itself, or its closest ancestor with an area,
@@ -172,7 +256,8 @@ function planLabel($area, $width, $height, $viewWidth)
 // The outlines and names of the areas are always shown. The area of $highlightID is highlighted, the others on hover.
 // With $editorFor, clicking on the plan draws the area of that location (see plan_editor in common.js).
 // With $zoomArea, only that part of the plan is shown, and the surroundings are faded.
-function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NULL, $zoomArea = NULL)
+// With $items (see planItems), hovering an area shows the items inside it (see planTooltipInit in common.js).
+function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NULL, $zoomArea = NULL, $items = NULL)
 {
   $width = (int)$planLocation["plan_width"];
   $height = (int)$planLocation["plan_height"];
@@ -201,16 +286,24 @@ function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NUL
       continue; // drawn by the editor
     $name = htmlspecialchars($area["name"]);
     // While drawing, the other areas are only shown for reference, so clicks go to the editor
+    $classes = "plan-link".(empty($area["nested"]) ? "" : " plan-nested");
     if ($editorFor)
-      echo "<g class=\"plan-link plan-reference\">";
+      echo "<g class=\"".$classes." plan-reference\">";
     else
-      echo "<a href=\"location?id=".$area["id"]."\" class=\"plan-link".($area["id"] == $highlightID ? " plan-highlight" : "")."\">";
+      echo "<a href=\"location?id=".$area["id"]."\" class=\"".$classes.($area["id"] == $highlightID ? " plan-highlight" : "")."\" data-location=\"".$area["id"]."\">";
     echo "<title>".$name."</title>";
     echo "<polygon class=\"plan-area\" points=\"".planAreaToSvgPoints($area["plan_area"], $width, $height)."\"/>";
     echo planLabel($area, $width, $height, $viewBox[2]);
     echo $editorFor ? "</g>" : "</a>";
   }
   echo "</svg>";
+  if ($items !== NULL)
+  {
+    echo "<div class=\"plan-tooltips\" hidden>";
+    foreach ($areas as $area)
+      echo planTooltip($area, $items[$area["id"]] ?? []);
+    echo "</div>";
+  }
   echo "</div>";
 }
 

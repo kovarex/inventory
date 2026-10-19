@@ -13,7 +13,10 @@ if (@$_GET["deleted"] == 'true')
 
 $formAction = "add";
 
+echo "<div class=\"title-row\"><button type=\"button\" onclick=\"toggleDialog(event, 'add-item-dialog');\">Add item</button></div>";
+echo "<div id=\"add-item-dialog\" class=\"dialog\" style=\"display:none;\">";
 itemForm($formAction, @$itemToEdit, "items");
+echo "</div>";
 ?>
 
 <hr>

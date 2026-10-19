@@ -18,6 +18,36 @@ class LocationTest extends InventoryTestCase
     $this->assertStringContainsString('Hammer', $response->body);
   }
 
+  public function testLocationPageLayout()
+  {
+    $context = new ContextPreparator([
+      'locations' => [['name' => 'House', 'children' => [['name' => 'Floor 1', 'children' => [['name' => 'Kitchen', 'children' => ['Drawer']]]], 'Attic']]],
+      'items' => [['name' => 'Spoon', 'location' => 'Drawer'], ['name' => 'Doormat', 'location' => 'House']]]);
+    $response = $context->client->get('/location', ['id' => $context->location('House')['id']]);
+    $this->assertPageOk($response);
+    // Just the name, with the buttons next to it, and the forms in dialogs
+    $this->assertStringContainsString('<div class="title-row"><h1>House</h1><button', $response->body);
+    $this->assertStringNotContainsString('Location:', $response->body);
+    $this->assertMatchesRegularExpression('#<div id="add-item-dialog" class="dialog" style="display:none;">\s*<form[^>]*action="add_item"#', $response->body);
+    // The items right here are listed, the sub-locations are collapsed with the count of the items inside
+    $this->assertStringContainsString('Doormat', $response->body);
+    $this->assertStringContainsString('<li><details><summary><a href="location?id='.$context->location('Floor 1')['id'].'">Floor 1</a> <span class="item-count">(1 item)</span></summary>', $response->body);
+    $this->assertStringNotContainsString('<details open', $response->body);
+    $this->assertStringContainsString('<li class="location-tree-leaf"><a href="location?id='.$context->location('Attic')['id'].'">Attic</a> <span class="item-count">(0 items)</span></li>', $response->body);
+    $this->assertStringContainsString('Spoon', $response->body);
+  }
+
+  public function testHeaderSearchesItems()
+  {
+    $context = new ContextPreparator(['items' => ['Hammer', 'Saw']]);
+    $body = $context->client->get('/locations')->body;
+    $this->assertStringContainsString('<form method="get" action="/items" class="header-search">', $body);
+    $response = $context->client->get('/items', ['search' => 'Ham', 'action' => 'search']);
+    $this->assertPageOk($response);
+    $this->assertStringContainsString('Hammer', $response->body);
+    $this->assertStringNotContainsString('>Saw<', $response->body);
+  }
+
   public function testAddLocation()
   {
     $context = new ContextPreparator(['locations' => ['Garage']]);
