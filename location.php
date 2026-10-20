@@ -99,16 +99,7 @@ function showLocationPlanControls($planLocations, $location)
 
 $planLocations = planLocations();
 
-// The path to the location, like Dům › 1. Patro › Obývák
-$path = [];
-$visited = [];
-for ($parentID = $location["parent_location_id"]; !empty($parentID) and isset($planLocations[$parentID]) and !isset($visited[$parentID]); $parentID = $planLocations[$parentID]["parent_location_id"])
-{
-  $visited[$parentID] = true;
-  array_unshift($path, locationLink($parentID, htmlspecialchars($planLocations[$parentID]["name"])));
-}
-if (!empty($path))
-  echo "<div class=\"breadcrumb\">".implode(" › ", $path)." ›</div>";
+echo locationBreadcrumb($planLocations, $location["parent_location_id"]);
 
 echo "<div class=\"title-row\"><h1>".$location["name"]."</h1>".
      "<button type=\"button\" onclick=\"toggleDialog(event, 'edit-dialog');\">Edit</button>".
