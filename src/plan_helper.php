@@ -29,6 +29,21 @@ function planLocations()
   return $locations;
 }
 
+// The path to a location shown above a page title, like Dům › 1. Patro › Obývák ›, or "" for no location.
+function locationBreadcrumb($locations, $locationID)
+{
+  $path = [];
+  $visited = [];
+  for ($id = $locationID; !empty($id) and isset($locations[$id]) and !isset($visited[$id]); $id = $locations[$id]["parent_location_id"])
+  {
+    $visited[$id] = true;
+    array_unshift($path, locationLink($id, htmlspecialchars($locations[$id]["name"])));
+  }
+  if (empty($path))
+    return "";
+  return "<div class=\"breadcrumb\">".implode(" › ", $path)." ›</div>";
+}
+
 // The closest ancestor (not the location itself) that has a plan, or NULL.
 function nearestPlanAncestor($locations, $locationID)
 {

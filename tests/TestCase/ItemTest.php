@@ -15,10 +15,26 @@ class ItemTest extends InventoryTestCase
     $context = new ContextPreparator(['items' => [['name' => 'Hammer', 'location' => 'Garage', 'category' => 'Tools', 'author' => 'Thor']]]);
     $response = $context->client->get('/item', ['id' => $context->item('Hammer')['id']]);
     $this->assertPageOk($response);
-    $this->assertStringContainsString('Item: Hammer', $response->body);
-    $this->assertStringContainsString('Garage', $response->body);
+    $this->assertStringContainsString('<div class="title-row"><h1>Hammer</h1><button', $response->body);
+    $this->assertStringContainsString('<div class="breadcrumb"><a href="location?id='.$context->location('Garage')['id'].'">Garage</a> ›</div>', $response->body);
+    // Delete is rare, so it is in the edit dialog, after the edit form
+    $this->assertMatchesRegularExpression('#<div id="edit-dialog" class="dialog" style="display:none;">\s*<form[^>]*action="edit_item".*?</form>\s*<div><form method="post" action="delete_item"#s', $response->body);
+    $this->assertSame(1, substr_count($response->body, 'action="delete_item"'));
     $this->assertStringContainsString('Tools', $response->body);
     $this->assertStringContainsString('Thor', $response->body);
+  }
+
+  public function testItemPageShowsThePathToItsLocation()
+  {
+    $context = new ContextPreparator([
+      'locations' => [['name' => 'House', 'children' => [['name' => 'Floor 1', 'children' => ['Kitchen']]]]],
+      'items' => [['name' => 'Spoon', 'location' => 'Kitchen']]]);
+    $body = $context->client->get('/item', ['id' => $context->item('Spoon')['id']])->body;
+    $this->assertStringContainsString('<div class="breadcrumb"><a href="location?id='.$context->location('House')['id'].'">House</a> › '.
+                                      '<a href="location?id='.$context->location('Floor 1')['id'].'">Floor 1</a> › '.
+                                      '<a href="location?id='.$context->location('Kitchen')['id'].'">Kitchen</a> ›</div>', $body);
+    // The location is in the path only, not repeated in the table below
+    $this->assertSame(1, substr_count($body, 'href="location?id='.$context->location('Kitchen')['id'].'"'));
   }
 
   public function testItemOfOtherHomeIsNotShown()

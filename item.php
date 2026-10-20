@@ -15,7 +15,6 @@ $result = query("SELECT
                    im_item.author,
                    im_item.deleted,
                    parent_location.id as location_id,
-                   parent_location.name as location_name,
                    im_category.id as category_id,
                    im_category.name as category_name,
                    length(im_item.image) > 0 as has_image
@@ -31,20 +30,21 @@ $item = $result->fetch_assoc();
 
 echo "<div id=\"edit-dialog\" class=\"dialog\" style=\"display:none;\">";
 itemForm("edit", $item, "item?id=".$_GET["id"]);
+// Deleting is rare, so it is in the edit dialog instead of a big button on the page
+echo "<div><form method=\"post\" action=\"".($item["deleted"] ? "restore_item" : "delete_item")."\" class=\"data-form\">
+        <input type=\"hidden\" name=\"id\" value=\"".$item["id"]."\"/>
+        <input type=\"hidden\" name=\"redirect\" value=\"item?id=".$item["id"]."\"/>
+        <label>".($item["deleted"] ? "Restore" : "Delete")." comment: <input type=\"text\" name=\"comment\"/></label>
+        <input type=\"submit\" value=\"".($item["deleted"] ? "Restore" : "Delete")."\"/>
+      </form></div>";
 echo "</div>";
 
-echo "<h1>".($item["deleted"] ? "(Deleted) " : "")."Item: ".$item["name"]."</h1>";
+$planLocations = planLocations();
+echo locationBreadcrumb($planLocations, $item["location_id"]);
 
-echo "<div><button type=\"button\" onclick=\"showEditDialog(event);\" style=\"width:90px;height:80px;\">Edit</button>";
+echo "<div class=\"title-row\"><h1>".($item["deleted"] ? "(Deleted) " : "").$item["name"]."</h1>".
+     "<button type=\"button\" onclick=\"toggleDialog(event, 'edit-dialog');\">Edit</button></div>";
 
-echo "<div>
-        <form method=\"post\" action=\"".($item["deleted"] ? "restore_item" : "delete_item")."\">
-          <input type=\"hidden\" name=\"id\" value=\"".$item["id"]."\"/>
-          <input type=\"hidden\" name=\"redirect\" value=\"item?id=".$item["id"]."\"/>
-          <input type=\"text\" name=\"comment\"/>
-          <input type=\"submit\";\" style=\"width:90px;height:80px;\" value=\"".($item["deleted"] ? "Restore" : "Delete")."\"/>
-        </form>
-      </div>";
 echo $item['description'];
 echo '
  <table>
@@ -52,15 +52,12 @@ echo '
       <td>Category:</td>
       <td>'.categoryLink($item["category_id"], $item['category_name']).'</td>
     </tr>
-    <tr>
-      <td>Location:</td>
-      <td>'.locationLink($item["location_id"], $item['location_name']).'</td>
-    </tr>';
+';
 if (!empty($item["author"]))
   echo "<tr><td>Author:</td><td>".$item["author"]."</td></tr>";
 echo "</table>";
 
-renderPlanWhere(planLocations(), $item["location_id"]);
+renderPlanWhere($planLocations, $item["location_id"]);
 
 echo itemImage($item["id"], $item["has_image"], "big");
 
