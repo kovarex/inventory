@@ -69,7 +69,8 @@ function itemImage($id, $generate, $type = "thumbnail")
 {
   if (!$generate)
     return "";
-  return "<img src=\"image?source=item&id=".$id."&type=".$type."\"/>";
+  // Lazy, so the pictures in collapsed parts of the location tree and further down long lists don't load
+  return "<img loading=\"lazy\" src=\"image?source=item&id=".$id."&type=".$type."\"/>";
 }
 
 function locationImage($id, $generate, $type = "thumbnail")
