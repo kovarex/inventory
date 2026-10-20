@@ -18,8 +18,10 @@ class PlanTest extends InventoryTestCase
     $this->assertStringContainsString('image?source=location&amp;id='.$context->location('Floor 1')['id'].'&amp;type=plan', $response->body);
     $this->assertStringContainsString('<polygon class="plan-area" points="100,50 500,50 500,250"/>', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Kitchen')['id'], $response->body);
-    // Shown inside the kitchen
-    $this->assertStringNotContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link', $response->body);
+    // Inside the kitchen, but reachable right from the floor, drawn over the kitchen
+    $this->assertStringContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link plan-nested"', $response->body);
+    $this->assertGreaterThan(strpos($response->body, 'location?id='.$context->location('Kitchen')['id'].'" class'),
+                             strpos($response->body, 'location?id='.$context->location('Kitchen drawer')['id'].'" class'));
     $this->assertStringContainsString('location?id='.$context->location('Bedroom')['id'].'" class="plan-link', $response->body);
     // Belongs to the plan of the bedroom
     $this->assertStringNotContainsString('location?id='.$context->location('Wardrobe')['id'].'" class="plan-link', $response->body);
@@ -100,6 +102,32 @@ class PlanTest extends InventoryTestCase
     $this->assertStringContainsString('<title>Skříň 1J - věci na vrácení</title>', $body);
     // Without a code, the name is shown
     $this->assertStringContainsString('<tspan x="750" dy="0em">Box A4</tspan></text>', $body);
+  }
+
+  public function testAreaTooltipListsTheItemsInside()
+  {
+    $context = new ContextPreparator([
+      'locations' => [[
+        'name' => 'Floor 1',
+        'plan' => true,
+        'children' => [
+          ['name' => 'Kitchen',
+           'area' => '0.1,0.1 0.5,0.1 0.5,0.9 0.1,0.9',
+           'children' => [['name' => 'Cupboard', 'area' => '0.2,0.2 0.3,0.2 0.3,0.3', 'children' => ['Drawer']]]],
+          ['name' => 'Pantry', 'area' => '0.6,0.1 0.9,0.1 0.9,0.9', 'children' => ['Shelf']]]]],
+      'items' => [['name' => 'Spoon', 'location' => 'Drawer'], ['name' => 'Pot', 'location' => 'Kitchen'],
+                  ['name' => 'Flour', 'location' => 'Shelf'], ['name' => 'Rice', 'location' => 'Pantry'],
+                  ['name' => 'Old jar', 'location' => 'Pantry', 'deleted' => true]]]);
+    $body = $context->client->get('/location', ['id' => $context->location('Floor 1')['id']])->body;
+    $tooltip = fn($name) => preg_match('#<div class="plan-tooltip-content" data-location="'.$context->location($name)['id'].'">(.*?)</div></div>#', $body, $match) ? $match[1] : '';
+    // The items of the locations below without an area are included, the deleted ones are left out
+    $this->assertStringContainsString('Pantry <span class="item-count">(2 items)</span>', $tooltip('Pantry'));
+    $this->assertStringContainsString('<li>Flour</li>', $tooltip('Pantry'));
+    $this->assertStringContainsString('<li>Rice</li>', $tooltip('Pantry'));
+    $this->assertStringNotContainsString('Old jar', $tooltip('Pantry'));
+    $this->assertStringContainsString('<li>Spoon</li>', $tooltip('Cupboard'));
+    // The kitchen has its cupboard drawn inside, which lists its items, so the kitchen doesn't list everything
+    $this->assertSame('', $tooltip('Kitchen'));
   }
 
   public function testItemShowsWhereItIsOnThePlan()

@@ -51,12 +51,13 @@ function showLocationPlans($planLocations, $location)
   }
   else if ($hasOwnView)
   {
-    echo "<h2>Plan".($container ? " (in ".locationLink($container["id"], $container["name"]).")" : "")."</h2>";
+    echo "<h2>Plan</h2>";
     renderPlanOf($planLocations, $planLocation);
   }
   else if (!empty($planLocation["plan_area"]) and $container)
   {
-    echo "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
+    // The parent is in the path above, a container higher up is named here
+    echo $container["id"] == $location["parent_location_id"] ? "<h2>Plan</h2>" : "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
     renderPlanOf($planLocations, $container, $location["id"]);
   }
 }
@@ -98,22 +99,34 @@ function showLocationPlanControls($planLocations, $location)
 
 $planLocations = planLocations();
 
-echo "<h1>Location: ".$location["name"]."</h1>";
-echo "<div>".$location["description"]."</div>";
-echo "<div><button type=\"button\" onclick=\"showEditDialog(event);\">Edit</button></div>";
+// The path to the location, like Dům › 1. Patro › Obývák
+$path = [];
+$visited = [];
+for ($parentID = $location["parent_location_id"]; !empty($parentID) and isset($planLocations[$parentID]) and !isset($visited[$parentID]); $parentID = $planLocations[$parentID]["parent_location_id"])
+{
+  $visited[$parentID] = true;
+  array_unshift($path, locationLink($parentID, htmlspecialchars($planLocations[$parentID]["name"])));
+}
+if (!empty($path))
+  echo "<div class=\"breadcrumb\">".implode(" › ", $path)." ›</div>";
 
-echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;display:none;\">";
+echo "<div class=\"title-row\"><h1>".$location["name"]."</h1>".
+     "<button type=\"button\" onclick=\"toggleDialog(event, 'edit-dialog');\">Edit</button>".
+     "<button type=\"button\" onclick=\"toggleDialog(event, 'add-item-dialog');\">Add item</button></div>";
+echo "<div>".$location["description"]."</div>";
+
+echo "<div id=\"edit-dialog\" class=\"dialog\" style=\"display:none;\">";
 locationForm("edit", $location, "location?id=".$_GET["id"]);
 showLocationPlanControls($planLocations, $location);
+echo "</div>";
+
+echo "<div id=\"add-item-dialog\" class=\"dialog\" style=\"display:none;\">";
+itemForm("add", NULL, "location?id=".$_GET["id"], $_GET["id"]);
 echo "</div>";
 
 echo "<div>".locationImage($location["id"], $location["has_image"], "big")."</div>";
 
 showLocationPlans($planLocations, $location);
-
-echo "<br/><br/>";
-itemForm("add", NULL, "location?id=".$_GET["id"], $_GET["id"]);
-echo "<br/><br/>";
 
 $structuredData["name"] = $location["name"];
 $structuredData["id"] = $location["id"];
@@ -156,34 +169,58 @@ $flatData = query("SELECT
 addToStructuredData($flatData);
 sortLocationStructureRecursive($structuredData, $locationPointers);
 
-if (count($structuredData) != 0)
+function itemCount($structuredData)
 {
-  function show($structuredData)
-  {
-    if (empty($structuredData))
-      return;
-    echo "<li>".locationLink($structuredData["id"], $structuredData["name"]);
-    if (!empty($structuredData["items"]))
-    {
-      echo "<ul>";
-      foreach($structuredData["items"] as $row)
-        echo "<li style=\" display: flex;flex-direction: row;align-items: center;\">".($row["has_image"] ? itemLink($row["id"], itemImage($row["id"], $row["name"])) : "").itemLink($row["id"], $row["name"])."</li>";
-      echo "</ul>";
-    }
-    if (!empty($structuredData["locations"]))
-    {
-      echo "<ul>";
-      foreach($structuredData["locations"] as $row)
-        show($row);
-      echo "</ul>";
-    }
-    echo "</li>";
-  }
+  $count = count($structuredData["items"] ?? []);
+  foreach ($structuredData["locations"] ?? [] as $row)
+    $count += itemCount($row);
+  return $count;
+}
 
-  echo "<div>".locationLink($location["parent_location_id"],$location["parent_location_name"])."</div>";
-
-  echo "<ul>";
-  show($structuredData);
+function showItems($structuredData)
+{
+  if (empty($structuredData["items"]))
+    return;
+  echo "<ul class=\"location-tree-items\">";
+  foreach($structuredData["items"] as $row)
+    echo "<li>".($row["has_image"] ? itemLink($row["id"], itemImage($row["id"], $row["name"])) : "").itemLink($row["id"], $row["name"])."</li>";
   echo "</ul>";
 }
+
+// A sub-location is collapsed with the count of the items inside, so the first level fits on the screen.
+function showLocation($structuredData)
+{
+  $count = itemCount($structuredData);
+  $label = locationLink($structuredData["id"], $structuredData["name"]).
+           " <span class=\"item-count\">(".$count." item".($count == 1 ? "" : "s").")</span>";
+  if (empty($structuredData["items"]) and empty($structuredData["locations"]))
+  {
+    echo "<li class=\"location-tree-leaf\">".$label."</li>";
+    return;
+  }
+  echo "<li><details><summary>".$label."</summary>";
+  showItems($structuredData);
+  showLocations($structuredData);
+  echo "</details></li>";
+}
+
+function showLocations($structuredData)
+{
+  if (empty($structuredData["locations"]))
+    return;
+  echo "<ul class=\"location-tree-locations\">";
+  foreach($structuredData["locations"] as $row)
+    showLocation($row);
+  echo "</ul>";
+}
+
+if (!empty($structuredData["items"]) or !empty($structuredData["locations"]))
+  echo "<h2>Contents</h2>";
+echo "<div class=\"location-tree\">";
+if (!empty($structuredData["locations"]))
+  echo "<div><button type=\"button\" onclick=\"setTreeExpanded(this, true);\">Expand all</button> ".
+       "<button type=\"button\" onclick=\"setTreeExpanded(this, false);\">Collapse all</button></div>";
+showItems($structuredData);
+showLocations($structuredData);
+echo "</div>";
 ?>

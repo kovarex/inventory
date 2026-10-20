@@ -37,3 +37,20 @@ h3 { margin: 0 auto; text-align: center;}
 svg[data-editor-for] {cursor: crosshair;}
 .plan-controls {margin-top: 6px;}
 .plan-surroundings {fill: rgba(255, 255, 255, 0.75); stroke: rgba(0, 0, 0, 0.5); stroke-width: 2; vector-effect: non-scaling-stroke; pointer-events: none;}
+.dialog {position: absolute; background: white; z-index: 10;}
+.title-row {display: flex; justify-content: center; align-items: center; gap: 10px;}
+.title-row h1 {width: auto; margin: 0;}
+.header-search {display: inline; margin-right: 10px;}
+.location-tree ul {list-style: none; padding-left: 20px;}
+.location-tree-items li {display: flex; flex-direction: row; align-items: center;}
+.location-tree summary {cursor: pointer;}
+.location-tree-leaf {padding-left: 16px;}
+.item-count {color: #777;}
+.plan-nested .plan-area {stroke-width: 1;}
+.plan-tooltip {position: fixed; z-index: 20; max-width: 320px; background: white; border: solid 1px #999; padding: 6px; pointer-events: none; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);}
+.plan-tooltip-title {font-weight: bold;}
+.plan-tooltip-items {list-style: none; margin: 4px 0 0 0; padding: 0;}
+.plan-tooltip-items li {display: flex; align-items: center; gap: 6px; margin: 2px 0;}
+.plan-tooltip-items img {max-width: 48px; max-height: 48px;}
+.top-user {text-align: right;}
+.breadcrumb {text-align: center; color: #555;}

@@ -29,7 +29,7 @@ if ($result->num_rows == 0)
 
 $item = $result->fetch_assoc();
 
-echo "<div id=\"edit-dialog\" style=\"position:absolute;background: white;display:none;\">";
+echo "<div id=\"edit-dialog\" class=\"dialog\" style=\"display:none;\">";
 itemForm("edit", $item, "item?id=".$_GET["id"]);
 echo "</div>";
 
