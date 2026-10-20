@@ -51,12 +51,13 @@ function showLocationPlans($planLocations, $location)
   }
   else if ($hasOwnView)
   {
-    echo "<h2>Plan".($container ? " (in ".locationLink($container["id"], $container["name"]).")" : "")."</h2>";
+    echo "<h2>Plan</h2>";
     renderPlanOf($planLocations, $planLocation);
   }
   else if (!empty($planLocation["plan_area"]) and $container)
   {
-    echo "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
+    // The parent is in the path above, a container higher up is named here
+    echo $container["id"] == $location["parent_location_id"] ? "<h2>Plan</h2>" : "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
     renderPlanOf($planLocations, $container, $location["id"]);
   }
 }
@@ -97,6 +98,17 @@ function showLocationPlanControls($planLocations, $location)
 }
 
 $planLocations = planLocations();
+
+// The path to the location, like Dům › 1. Patro › Obývák
+$path = [];
+$visited = [];
+for ($parentID = $location["parent_location_id"]; !empty($parentID) and isset($planLocations[$parentID]) and !isset($visited[$parentID]); $parentID = $planLocations[$parentID]["parent_location_id"])
+{
+  $visited[$parentID] = true;
+  array_unshift($path, locationLink($parentID, htmlspecialchars($planLocations[$parentID]["name"])));
+}
+if (!empty($path))
+  echo "<div class=\"breadcrumb\">".implode(" › ", $path)." ›</div>";
 
 echo "<div class=\"title-row\"><h1>".$location["name"]."</h1>".
      "<button type=\"button\" onclick=\"toggleDialog(event, 'edit-dialog');\">Edit</button>".
@@ -202,9 +214,8 @@ function showLocations($structuredData)
   echo "</ul>";
 }
 
-if (!empty($location["parent_location_id"]))
-  echo "<div>".locationLink($location["parent_location_id"], $location["parent_location_name"])."</div>";
-
+if (!empty($structuredData["items"]) or !empty($structuredData["locations"]))
+  echo "<h2>Contents</h2>";
 echo "<div class=\"location-tree\">";
 if (!empty($structuredData["locations"]))
   echo "<div><button type=\"button\" onclick=\"setTreeExpanded(this, true);\">Expand all</button> ".

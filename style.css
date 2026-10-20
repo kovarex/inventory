@@ -53,3 +53,4 @@ svg[data-editor-for] {cursor: crosshair;}
 .plan-tooltip-items li {display: flex; align-items: center; gap: 6px; margin: 2px 0;}
 .plan-tooltip-items img {max-width: 48px; max-height: 48px;}
 .top-user {text-align: right;}
+.breadcrumb {text-align: center; color: #555;}

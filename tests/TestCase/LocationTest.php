@@ -35,6 +35,14 @@ class LocationTest extends InventoryTestCase
     $this->assertStringNotContainsString('<details open', $response->body);
     $this->assertStringContainsString('<li class="location-tree-leaf"><a href="location?id='.$context->location('Attic')['id'].'">Attic</a> <span class="item-count">(0 items)</span></li>', $response->body);
     $this->assertStringContainsString('Spoon', $response->body);
+    $this->assertStringContainsString('<h2>Contents</h2>', $response->body);
+
+    // The parents are in the path above the name, not repeated below
+    $kitchen = $context->client->get('/location', ['id' => $context->location('Kitchen')['id']])->body;
+    $this->assertStringContainsString('<div class="breadcrumb"><a href="location?id='.$context->location('House')['id'].'">House</a> › '.
+                                      '<a href="location?id='.$context->location('Floor 1')['id'].'">Floor 1</a> ›</div>', $kitchen);
+    $this->assertSame(1, substr_count($kitchen, 'href="location?id='.$context->location('Floor 1')['id'].'"'));
+    $this->assertStringNotContainsString('class="breadcrumb"', $response->body);
   }
 
   public function testHeaderSearchesItems()
