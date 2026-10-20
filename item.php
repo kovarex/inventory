@@ -30,6 +30,13 @@ $item = $result->fetch_assoc();
 
 echo "<div id=\"edit-dialog\" class=\"dialog\" style=\"display:none;\">";
 itemForm("edit", $item, "item?id=".$_GET["id"]);
+// Deleting is rare, so it is in the edit dialog instead of a big button on the page
+echo "<div><form method=\"post\" action=\"".($item["deleted"] ? "restore_item" : "delete_item")."\" class=\"data-form\">
+        <input type=\"hidden\" name=\"id\" value=\"".$item["id"]."\"/>
+        <input type=\"hidden\" name=\"redirect\" value=\"item?id=".$item["id"]."\"/>
+        <label>".($item["deleted"] ? "Restore" : "Delete")." comment: <input type=\"text\" name=\"comment\"/></label>
+        <input type=\"submit\" value=\"".($item["deleted"] ? "Restore" : "Delete")."\"/>
+      </form></div>";
 echo "</div>";
 
 $planLocations = planLocations();
@@ -38,14 +45,6 @@ echo locationBreadcrumb($planLocations, $item["location_id"]);
 echo "<div class=\"title-row\"><h1>".($item["deleted"] ? "(Deleted) " : "").$item["name"]."</h1>".
      "<button type=\"button\" onclick=\"toggleDialog(event, 'edit-dialog');\">Edit</button></div>";
 
-echo "<div>
-        <form method=\"post\" action=\"".($item["deleted"] ? "restore_item" : "delete_item")."\">
-          <input type=\"hidden\" name=\"id\" value=\"".$item["id"]."\"/>
-          <input type=\"hidden\" name=\"redirect\" value=\"item?id=".$item["id"]."\"/>
-          <input type=\"text\" name=\"comment\"/>
-          <input type=\"submit\";\" style=\"width:90px;height:80px;\" value=\"".($item["deleted"] ? "Restore" : "Delete")."\"/>
-        </form>
-      </div>";
 echo $item['description'];
 echo '
  <table>

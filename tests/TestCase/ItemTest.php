@@ -17,6 +17,9 @@ class ItemTest extends InventoryTestCase
     $this->assertPageOk($response);
     $this->assertStringContainsString('<div class="title-row"><h1>Hammer</h1><button', $response->body);
     $this->assertStringContainsString('<div class="breadcrumb"><a href="location?id='.$context->location('Garage')['id'].'">Garage</a> ›</div>', $response->body);
+    // Delete is rare, so it is in the edit dialog, after the edit form
+    $this->assertMatchesRegularExpression('#<div id="edit-dialog" class="dialog" style="display:none;">\s*<form[^>]*action="edit_item".*?</form>\s*<div><form method="post" action="delete_item"#s', $response->body);
+    $this->assertSame(1, substr_count($response->body, 'action="delete_item"'));
     $this->assertStringContainsString('Tools', $response->body);
     $this->assertStringContainsString('Thor', $response->body);
   }
