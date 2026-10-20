@@ -97,7 +97,9 @@ function planAreasDeep($locations, $containerID)
         {
           $visited[$area["id"]] = true;
           $area["nested"] = $parentID != $containerID;
-          $result[] = $area;
+          $result[$area["id"]] = $area;
+          if ($area["nested"])
+            $result[$parentID]["has_inner_areas"] = true;
           // A location with its own plan shows its insides on that plan
           if (!$area["has_plan"])
             $next[] = $area["id"];
@@ -105,7 +107,7 @@ function planAreasDeep($locations, $containerID)
     }
     $level = $next;
   }
-  return $result;
+  return array_values($result);
 }
 
 // The items in each location and the locations below it, indexed by the location id.
@@ -300,8 +302,11 @@ function renderPlan($planLocation, $areas, $highlightID = NULL, $editorFor = NUL
   if ($items !== NULL)
   {
     echo "<div class=\"plan-tooltips\" hidden>";
+    // An area with the areas inside it drawn too (a room with its cupboards) would list everything in them,
+    // so only the innermost areas list their items.
     foreach ($areas as $area)
-      echo planTooltip($area, $items[$area["id"]] ?? []);
+      if (empty($area["has_inner_areas"]))
+        echo planTooltip($area, $items[$area["id"]] ?? []);
     echo "</div>";
   }
   echo "</div>";

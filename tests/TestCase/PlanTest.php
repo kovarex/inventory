@@ -110,20 +110,24 @@ class PlanTest extends InventoryTestCase
       'locations' => [[
         'name' => 'Floor 1',
         'plan' => true,
-        'children' => [[
-          'name' => 'Kitchen',
-          'area' => '0.1,0.1 0.9,0.1 0.9,0.9 0.1,0.9',
-          'children' => [['name' => 'Cupboard', 'area' => '0.2,0.2 0.3,0.2 0.3,0.3', 'children' => ['Drawer']]]]]]],
-      'items' => [['name' => 'Spoon', 'location' => 'Drawer'], ['name' => 'Pot', 'location' => 'Kitchen'], ['name' => 'Old pan', 'location' => 'Kitchen', 'deleted' => true]]]);
+        'children' => [
+          ['name' => 'Kitchen',
+           'area' => '0.1,0.1 0.5,0.1 0.5,0.9 0.1,0.9',
+           'children' => [['name' => 'Cupboard', 'area' => '0.2,0.2 0.3,0.2 0.3,0.3', 'children' => ['Drawer']]]],
+          ['name' => 'Pantry', 'area' => '0.6,0.1 0.9,0.1 0.9,0.9', 'children' => ['Shelf']]]]],
+      'items' => [['name' => 'Spoon', 'location' => 'Drawer'], ['name' => 'Pot', 'location' => 'Kitchen'],
+                  ['name' => 'Flour', 'location' => 'Shelf'], ['name' => 'Rice', 'location' => 'Pantry'],
+                  ['name' => 'Old jar', 'location' => 'Pantry', 'deleted' => true]]]);
     $body = $context->client->get('/location', ['id' => $context->location('Floor 1')['id']])->body;
     $tooltip = fn($name) => preg_match('#<div class="plan-tooltip-content" data-location="'.$context->location($name)['id'].'">(.*?)</div></div>#', $body, $match) ? $match[1] : '';
-    // The kitchen has the items of its cupboard too, the deleted ones are left out
-    $this->assertStringContainsString('Kitchen <span class="item-count">(2 items)</span>', $tooltip('Kitchen'));
-    $this->assertStringContainsString('<li>Pot</li>', $tooltip('Kitchen'));
-    $this->assertStringContainsString('<li>Spoon</li>', $tooltip('Kitchen'));
-    $this->assertStringNotContainsString('Old pan', $tooltip('Kitchen'));
+    // The items of the locations below without an area are included, the deleted ones are left out
+    $this->assertStringContainsString('Pantry <span class="item-count">(2 items)</span>', $tooltip('Pantry'));
+    $this->assertStringContainsString('<li>Flour</li>', $tooltip('Pantry'));
+    $this->assertStringContainsString('<li>Rice</li>', $tooltip('Pantry'));
+    $this->assertStringNotContainsString('Old jar', $tooltip('Pantry'));
     $this->assertStringContainsString('<li>Spoon</li>', $tooltip('Cupboard'));
-    $this->assertStringNotContainsString('Pot', $tooltip('Cupboard'));
+    // The kitchen has its cupboard drawn inside, which lists its items, so the kitchen doesn't list everything
+    $this->assertSame('', $tooltip('Kitchen'));
   }
 
   public function testItemShowsWhereItIsOnThePlan()
