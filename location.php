@@ -51,13 +51,10 @@ function showLocationPlans($planLocations, $location)
   }
   else if ($hasOwnView)
   {
-    echo "<h2>Plan</h2>";
     renderPlanOf($planLocations, $planLocation);
   }
   else if (!empty($planLocation["plan_area"]) and $container)
   {
-    // The parent is in the path above, a container higher up is named here
-    echo $container["id"] == $location["parent_location_id"] ? "<h2>Plan</h2>" : "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
     renderPlanOf($planLocations, $container, $location["id"]);
   }
 }

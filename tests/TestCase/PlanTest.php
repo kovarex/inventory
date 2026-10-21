@@ -143,8 +143,8 @@ class PlanTest extends InventoryTestCase
       'items' => [['name' => 'Spoon', 'location' => 'Drawer']]]);
     $response = $context->client->get('/item', ['id' => $context->item('Spoon')['id']]);
     $this->assertPageOk($response);
-    // The drawer has no area, so its cupboard is highlighted in the kitchen
-    $this->assertStringContainsString('<h2>In <a href="location?id='.$context->location('Kitchen')['id'].'"', $response->body);
+    // The drawer has no area, so its cupboard is highlighted in the kitchen, with no heading, as the path above already names it
+    $this->assertStringNotContainsString('<h2>', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Cupboard')['id'].'" class="plan-link plan-highlight"', $response->body);
   }
 
@@ -164,7 +164,7 @@ class PlanTest extends InventoryTestCase
       'children' => [['name' => 'Kitchen', 'children' => [['name' => 'Kitchen drawer', 'area' => self::KITCHEN_AREA]]]]]]]);
     $response = $context->client->get('/location', ['id' => $context->location('Kitchen drawer')['id']]);
     $this->assertPageOk($response);
-    $this->assertStringContainsString('<h2>In ', $response->body);
+    $this->assertStringNotContainsString('<h2>', $response->body);
     $this->assertStringContainsString('location?id='.$context->location('Kitchen drawer')['id'].'" class="plan-link plan-highlight"', $response->body);
     $this->assertStringContainsString('Redraw the area', $this->planControls($response->body));
   }
