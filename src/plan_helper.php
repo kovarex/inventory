@@ -199,7 +199,6 @@ function renderPlanWhere($locations, $locationID)
     $container = empty($location["plan_area"]) ? NULL : areaContainer($locations, $locationID);
     if ($container)
     {
-      echo "<h2>In ".locationLink($container["id"], $container["name"])."</h2>";
       renderPlanOf($locations, $container, $locationID);
       return;
     }
